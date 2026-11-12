@@ -13,6 +13,7 @@ services:
       - todo_network
 
   api:
+    image: aditya5005/todo-api:latest
     build:
       context: ./api
       dockerfile: Dockerfile
