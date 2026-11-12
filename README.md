@@ -1,6 +1,8 @@
 # Multi-Container Application Using Docker
 
-A production-grade multi-container DevOps application demonstrating container orchestration, persistent database storage, reverse proxy routing, Infrastructure as Code (Terraform), configuration automation (Ansible), and continuous deployment pipelines (GitHub Actions & Jenkins).
+A production-ready, multi-container DevOps application built with **Node.js**, **Express**, **MongoDB**, **Nginx**, **Docker Compose**, **Terraform**, **Ansible**, and **GitHub Actions**.
+
+Based on the [roadmap.sh Multi-Container Application DevOps Project](https://roadmap.sh/projects/multi-container-application).
 
 ---
 
@@ -12,70 +14,65 @@ A production-grade multi-container DevOps application demonstrating container or
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
 - [Environment Variables](#environment-variables)
-- [CI/CD & Jenkins Pipeline](#cicd--jenkins-pipeline)
-- [Docker & Container Orchestration](#docker--container-orchestration)
+- [Docker & Containerization](#docker--containerization)
+- [CI/CD Pipeline](#cicd-pipeline)
 
 ---
 
 ## Overview
 
-This project implements an end-to-end containerized microservices platform centered around a RESTful Todo service connected to a MongoDB database. It serves as a real-world reference implementation for bridging local containerized development with automated cloud infrastructure and zero-downtime deployment pipelines.
-
-The platform provides:
-- A high-throughput Node.js Express REST API with input validation and centralized error handling.
-- A persistent MongoDB 7.0 database configured with dedicated Docker named volumes to guarantee zero data loss across container lifecycles.
-- An Nginx reverse proxy gateway handling security headers, rate limiting, and traffic routing.
-- An interactive, responsive Web Dashboard built with Tailwind CSS and modern design tokens.
-- Automated provisioning and configuration via Terraform, Ansible, GitHub Actions, and Jenkins.
+This project demonstrates the complete end-to-end lifecycle of a stateful, multi-container cloud application. It bridges the gap between single-container local scripting and automated cloud deployment by combining:
+- A RESTful **Node.js & Express** backend connected to **MongoDB 7.0**.
+- **Docker Compose** multi-container orchestration with persistent named storage volumes.
+- An **Nginx** reverse proxy gateway managing HTTP routing and security headers.
+- **Infrastructure as Code (Terraform)** for automated cloud virtual machine provisioning.
+- **Configuration Management (Ansible)** for automated system hardening and Docker runtime deployment.
+- A **GitHub Actions CI/CD pipeline** automating test suites, Docker Hub image publication, and zero-downtime remote deployment.
+- A modern, responsive **Web Dashboard** built with Tailwind CSS and Be Vietnam Pro typography.
 
 ---
 
 ## Key Features
 
-- **Full RESTful CRUD API:** Complete endpoint coverage for tasks (`GET`, `POST`, `GET /:id`, `PUT /:id`, `DELETE /:id`).
-- **Resilient Database Layer:** Mongoose connection manager with exponential backoff retry logic, ensuring the API survives slow database boots.
-- **Zero Data Loss Storage:** Docker named volumes guarantee complete data persistence across container restarts, removals, and recreations.
-- **Reverse Proxy Gateway:** Nginx reverse proxy routing port 80 traffic to internal service containers while isolating database ports from public exposure.
-- **Production-Hardened Containers:** Multi-stage Docker builds based on Alpine Linux running under unprivileged non-root users (`USER node`).
-- **Interactive Web Dashboard:** Modern, responsive dark/light UI with real-time cluster health monitoring, scope tagging, and task filtering.
-- **Automated Health Telemetry:** Dedicated `/health` diagnostic endpoint reporting system uptime, memory usage, and live database connection state.
-- **Comprehensive Automation:** Dual CI/CD support through GitHub Actions workflows and Jenkins Declarative Pipelines.
+- **Full RESTful Todo API:** Complete CRUD endpoints (`GET /todos`, `POST /todos`, `GET /todos/:id`, `PUT /todos/:id`, `DELETE /todos/:id`).
+- **Resilient MongoDB Persistence:** Mongoose connection manager with an exponential backoff retry loop; persistent state backed by Docker named volumes (`mongodb_data`).
+- **Health Check & Diagnostics:** `/health` endpoint returning real-time uptime, API memory metrics, and MongoDB connection status.
+- **Reverse Proxy Gateway:** Nginx terminating public HTTP traffic, enforcing security headers (`X-Frame-Options`, `X-Content-Type-Options`), and routing upstream traffic to internal container DNS.
+- **Responsive Web Dashboard:** Clean, interactive UI with live cluster connection pills, dynamic metrics (Total, Pending, Completed), scope tag selectors, and instant state toggling.
+- **Automated Infrastructure as Code:** Terraform scripts provisioning cloud virtual machines, VPC security rules, and firewall port restrictions.
+- **Ansible Configuration Automation:** Agentless bootstrap playbooks installing Docker Engine, UFW firewall, and launching container stacks.
+- **Automated CI/CD:** GitHub Actions running unit and integration tests against real MongoDB service containers and publishing images to Docker Hub.
 
 ---
 
 ## System Architecture
 
-```mermaid
-flowchart TD
-    subgraph PublicInternet ["Public Internet"]
-        Client["Web Browser / Client"]
-        CI["GitHub Actions / Jenkins Runner"]
-    end
-
-    subgraph Host ["Production Host (Docker Engine)"]
-        subgraph BridgeNetwork ["Bridge Network: 'todo_network'"]
-            Nginx["Nginx Reverse Proxy\n(Port 80)"]
-            API["Node.js Express API\n(Internal Port 5000)"]
-            DB[("MongoDB 7.0 Database\n(Internal Port 27017)")]
-        end
-
-        subgraph Storage ["Persistent Volume Storage"]
-            Volume[("Named Volume: 'mongodb_data'\n(/data/db)")]
-        end
-    end
-
-    subgraph Registry ["Container Registry"]
-        DHub["Docker Hub\n(aditya5005/todo-api:latest)"]
-    end
-
-    Client -->|HTTP Port 80| Nginx
-    Client -.->|Direct Port 5000 (Dev)| API
-    Nginx -->|Proxy /todos & /health| API
-    API -->|Mongoose Connection| DB
-    DB <-->|Read / Write| Volume
-
-    CI -->|Build & Push| DHub
-    DHub -.->|Pull Image| Host
+```
+                       Public Internet
+                              │
+                    Port 80 (HTTP) / 443 (HTTPS)
+                              ▼
+            ┌───────────────────────────────────┐
+            │   Nginx Reverse Proxy Container   │
+            │          (Port 80 / 443)          │
+            └─────────────────┬─────────────────┘
+                              │
+               Internal Network: 'todo_network'
+                              │
+              ┌───────────────┴───────────────┐
+              │                               │
+              ▼                               ▼
+  ┌───────────────────────────────┐   ┌───────────────────────────────┐
+  │     Node.js Express API       │   │      MongoDB Database         │
+  │     Container (Port 5000)     │◄──┤     Container (Port 27017)    │
+  │     (No host port exposure)   │   │     (Internal network only)   │
+  └───────────────────────────────┘   └───────────────┬───────────────┘
+                                                      │
+                                                      ▼
+                                      ┌───────────────────────────────┐
+                                      │     Docker Named Volume       │
+                                      │   'mongodb_data' (/data/db)   │
+                                      └───────────────────────────────┘
 ```
 
 ---
@@ -83,48 +80,48 @@ flowchart TD
 ## Project Structure
 
 ```text
-├── .github/
-│   └── workflows/
-│       ├── test.yml                   # CI: Automated tests with MongoDB service container
-│       └── deploy.yml                 # CD: Build, push to Docker Hub & remote SSH deploy
-├── ansible/
-│   ├── ansible.cfg                    # Ansible configuration
-│   ├── inventory.ini                  # Target server connection inventory
-│   └── playbook.yml                   # System updates, UFW firewall, Docker install & deploy
-├── api/
-│   ├── public/                        # Bundled Web Dashboard static assets (HTML/CSS/JS)
+c:\AAE\
+├── api/                                # Backend Express API service
 │   ├── src/
-│   │   ├── config/db.js               # Database connection with retry mechanism
-│   │   ├── controllers/               # Todo and Health controllers
-│   │   ├── middleware/                # Validator and centralized error handler
-│   │   ├── models/todo.model.js       # Mongoose schema definition
-│   │   ├── routes/                    # API route definitions
-│   │   └── app.js                     # Express application setup
-│   ├── test/api.test.js               # Node native integration test suite (8/8 tests)
+│   │   ├── config/db.js               # Mongoose connection with exponential backoff
+│   │   ├── controllers/               # Todo & Health business logic controllers
+│   │   ├── middleware/                # Validation & centralized error handlers
+│   │   ├── models/todo.model.js       # Mongoose document schema definition
+│   │   ├── routes/                    # Express routing declarations
+│   │   └── app.js                     # Express app setup and middleware chain
+│   ├── public/                        # Static UI assets bundled with API
+│   ├── test/api.test.js               # Automated integration test suite
+│   ├── server.js                      # Entrypoint with graceful shutdown hooks
 │   ├── Dockerfile                     # Multi-stage production container build
-│   ├── Dockerfile.dev                 # Development container with nodemon hot-reload
-│   ├── package.json                   # Dependencies and npm scripts
-│   └── server.js                      # Server entry point with graceful shutdown
-├── client/
-│   └── public/                        # Standalone frontend client dashboard
-├── proxy/
-│   ├── Dockerfile                     # Nginx Alpine container definition
-│   └── nginx.conf                     # Reverse proxy routing and security headers
-├── scripts/
-│   ├── verify-resilience.ps1          # PowerShell end-to-end verification script
-│   └── verify-resilience.sh           # Bash end-to-end verification script
-├── terraform/
-│   ├── main.tf                        # Cloud VM and firewall resource definitions
-│   ├── provider.tf                    # DigitalOcean / Cloud provider configuration
-│   ├── variables.tf                   # Input variables (region, droplet size, keys)
-│   └── outputs.tf                     # Public IP and connection outputs
-├── docker-compose.yml                 # Primary multi-container setup (API + MongoDB)
-├── docker-compose.dev.yml             # Hot-reloading development setup
-├── docker-compose.prod.yml            # 3-tier production setup with Nginx reverse proxy
-├── Jenkinsfile                        # Declarative Jenkins CI/CD pipeline
-├── .env.example                       # Documented environment template
-├── .gitignore                         # Git exclusion rules
-└── README.md                          # Project documentation
+│   └── Dockerfile.dev                 # Hot-reloading development container
+├── proxy/                             # Nginx reverse proxy configuration
+│   ├── nginx.conf                     # Reverse proxy routing & security headers
+│   └── Dockerfile                     # Nginx Alpine container definition
+├── client/public/                     # Standalone frontend dashboard source
+│   ├── index.html                     # Responsive Tailwind CSS dashboard
+│   ├── style.css                      # Custom styles and design tokens
+│   └── app.js                         # Reactive API fetch client
+├── terraform/                         # Infrastructure as Code
+│   ├── provider.tf                    # Cloud provider definitions (DigitalOcean/AWS)
+│   ├── main.tf                        # VM resources, firewall, and SSH keys
+│   ├── variables.tf                   # Sizing, region, and SSH parameters
+│   └── outputs.tf                     # Public IP address and connection strings
+├── ansible/                           # Server configuration management
+│   ├── ansible.cfg                    # Ansible runtime defaults
+│   ├── inventory.ini                  # Target server host configuration
+│   └── playbook.yml                   # Docker installation & app deployment playbook
+├── .github/workflows/                 # Continuous Integration & Continuous Deployment
+│   ├── test.yml                       # Runs automated tests against live MongoDB
+│   └── deploy.yml                     # Builds Docker image, pushes to Docker Hub, deploys via SSH
+├── docker-compose.yml                 # Standard multi-container orchestration (API + MongoDB)
+├── docker-compose.dev.yml             # Local development orchestration with hot-reloading
+├── docker-compose.prod.yml            # Production 3-tier orchestration (Nginx + API + MongoDB)
+├── .env.example                       # Documented environment variables template
+├── PRD.md                             # Product Requirements Document
+├── TECHNICAL_ARCHITECTURE.md          # Comprehensive Technical Architecture Specification
+├── SECURITY_AND_ACCESS.md             # Security, Access Controls & Error Handling Spec
+├── FRONTEND_SPECIFICATION.md          # UI/UX Design System & API Integration Contract
+└── FEATURE_TICKET_LIST.md             # Phase-wise build checklist and tickets
 ```
 
 ---
@@ -133,168 +130,97 @@ flowchart TD
 
 ### Prerequisites
 
-- [Docker](https://docs.docker.com/get-docker/) (v24.0+) & [Docker Compose](https://docs.docker.com/compose/) (v2.20+)
-- [Node.js](https://nodejs.org/) (v20 LTS) *(for optional local host development)*
-- [Git](https://git-scm.com/)
+- [Docker Engine & Docker Compose](https://docs.docker.com/get-docker/)
+- [Node.js 20 LTS](https://nodejs.org/) (optional, for running standalone outside containers)
 
-### Step 1: Clone the Repository
+### 1. Run with Docker Compose (Standard Setup)
 
-```bash
-git clone https://github.com/ADITYAGUPTA112/Multi-Container-Application-Using-Docker.git
-cd Multi-Container-Application-Using-Docker
-```
+Spins up the **Node.js API** and **MongoDB database** with persistent volume storage:
 
-### Step 2: Configure Environment
-
-```bash
-cp .env.example .env
-```
-
-### Step 3: Run the Application
-
-#### Option A: Standard Multi-Container Stack (Port 5000)
-
-```bash
+```powershell
 docker-compose up -d
 ```
-- Open in browser: **http://localhost:5000**
-- Health check: **http://localhost:5000/health**
 
-#### Option B: Production 3-Tier Stack with Nginx Gateway (Port 80)
+- **Web Dashboard & API:** [http://localhost:5000](http://localhost:5000)
+- **Health Diagnostics:** [http://localhost:5000/health](http://localhost:5000/health)
+- **Todos Endpoint:** [http://localhost:5000/todos](http://localhost:5000/todos)
 
-```bash
-docker-compose -f docker-compose.prod.yml up -d
+### 2. Run with Nginx Reverse Proxy (Production 3-Tier Mode)
+
+Spins up **Nginx Gateway (Port 80) + Node.js API + MongoDB**:
+
+```powershell
+docker-compose -f docker-compose.prod.yml up -d --build
 ```
-- Open in browser: **http://localhost**
 
-#### Option C: Local Development with Hot-Reloading
+- **Access Application:** [http://localhost](http://localhost) (Port 80)
 
-```bash
+### 3. Run in Local Development Mode (Hot-Reloading)
+
+Mounts your local code into the container; edits in `./api/src` immediately reload via nodemon:
+
+```powershell
 docker-compose -f docker-compose.dev.yml up
 ```
 
-### Step 4: Run the Test Suite
+### 4. Run Automated Test Suite
 
-```bash
+Runs all endpoint and validation integration tests using Node's native test runner:
+
+```powershell
 cd api
 npm test
 ```
 
-### Step 5: Stop Containers
+### 5. Stop Containers
 
-```bash
+```powershell
 docker-compose down
 ```
-*(Data remains permanently preserved in the `mongodb_data` Docker volume.)*
 
 ---
 
 ## Environment Variables
 
-The application is configured using environment variables defined in `.env`:
+Copy `.env.example` to `.env` to configure local settings:
 
-| Variable | Scope | Default Value | Description |
-| :--- | :--- | :--- | :--- |
-| `HOST_PORT` | Compose | `5000` | Host port mapped to the API container. |
-| `PORT` | API | `5000` | Internal port Express listens on inside the container. |
-| `NODE_ENV` | API | `production` | Application runtime environment (`development` / `production` / `test`). |
-| `MONGO_URI` | API | `mongodb://mongodb:27017/todos_db` | Connection string using internal Docker DNS hostname. |
-| `CLIENT_ORIGIN` | API | `*` | Allowed CORS origin header for cross-origin requests. |
-| `DOCKER_IMAGE` | CI/CD | `aditya5005/todo-api` | Docker Hub registry repository tag. |
-
----
-
-## CI/CD & Jenkins Pipeline
-
-The project supports both **GitHub Actions** and a **Jenkins Declarative Pipeline** for continuous integration and delivery.
-
-### 1. GitHub Actions Workflows
-
-- **CI Pipeline (`.github/workflows/test.yml`):**
-  Spins up a temporary MongoDB service container, runs dependency validation, and executes the integration test suite on every pull request and push to `main`.
-- **CD Pipeline (`.github/workflows/deploy.yml`):**
-  Builds multi-platform container images via Docker Buildx, authenticates with Docker Hub, publishes images tagged with commit SHA and `:latest`, and executes an SSH command on the remote server to pull and restart containers with zero downtime.
-
-### 2. Jenkins Declarative Pipeline (`Jenkinsfile`)
-
-The repository includes a production-grade `Jenkinsfile` structured across 6 automated stages:
-
-```groovy
-pipeline {
-    agent any
-
-    environment {
-        DOCKER_IMAGE = 'aditya5005/todo-api'
-        DOCKER_TAG = "${env.BUILD_NUMBER}"
-        DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
-    }
-
-    stages {
-        stage('Checkout Source') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Install & Test') {
-            steps {
-                dir('api') {
-                    sh 'npm ci'
-                    sh 'npm test'
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} -t ${DOCKER_IMAGE}:latest ./api"
-            }
-        }
-
-        stage('Push to Docker Hub') {
-            steps {
-                sh 'echo $DOCKER_HUB_CREDS_PSW | docker login -u $DOCKER_HUB_CREDS_USR --password-stdin'
-                sh "docker push ${DOCKER_IMAGE}:${DOCKER_TAG}"
-                sh "docker push ${DOCKER_IMAGE}:latest"
-            }
-        }
-
-        stage('Deploy Multi-Container Stack') {
-            steps {
-                sh 'docker compose -f docker-compose.prod.yml pull'
-                sh 'docker compose -f docker-compose.prod.yml up -d --remove-orphans'
-            }
-        }
-
-        stage('Verify Health') {
-            steps {
-                sh 'sleep 5'
-                sh 'curl -f http://localhost/health || curl -f http://localhost:5000/health'
-            }
-        }
-    }
-}
-```
+| Variable | Default Value | Description |
+| :--- | :--- | :--- |
+| `HOST_PORT` | `5000` | Host port mapped to the API container. |
+| `PORT` | `5000` | Internal port on which Express listens. |
+| `NODE_ENV` | `production` | Runtime mode (`development`, `production`, `test`). |
+| `MONGO_URI` | `mongodb://mongodb:27017/todos_db` | Connection string pointing to internal container DNS. |
+| `CLIENT_ORIGIN` | `*` | Allowed CORS origin for cross-domain requests. |
 
 ---
 
-## Docker & Container Orchestration
+## Docker & Containerization
 
-### Docker Architecture Highlights
+### Multi-Stage Production Dockerfile (`api/Dockerfile`)
+- **Stage 1 (Builder):** Uses `node:20-alpine` to install dependencies and prune `devDependencies`.
+- **Stage 2 (Runner):** Minimal production image copying only production artifacts; drops root privileges to unprivileged `USER node`.
+- **Built-in Healthcheck:** Periodically validates API responsiveness via `curl -f http://localhost:5000/health`.
 
-- **Multi-Stage Build (`api/Dockerfile`):**
-  - *Stage 1 (Builder):* Resolves dependencies and prunes dev packages.
-  - *Stage 2 (Runner):* Uses minimal `node:20-alpine` footprint (<150MB), drops privileges to `USER node`, and includes container health checks via `/health`.
-- **Network Isolation:**
-  Containers communicate over a private bridge network (`todo_network`). In production (`docker-compose.prod.yml`), MongoDB port `27017` and API port `5000` are completely unexposed to the host network; only Nginx port `80` accepts ingress traffic.
-- **Volume Persistence:**
-  MongoDB stores data in `/data/db` mapped to the named volume `mongodb_data`, guaranteeing complete persistence across restarts:
-  ```bash
-  # Verify volume existence
-  docker volume ls | grep mongodb_data
-  ```
-- **Official Docker Hub Image:**
-  The container image is published and pullable from Docker Hub:
-  ```bash
-  docker pull aditya5005/todo-api:latest
-  ```
+### Network & Storage Isolation
+- **Bridge Network (`todo_network`):** Containers communicate through internal service names (`api`, `mongodb`).
+- **Database Perimeter Defense:** Port `27017` is not exposed to the public host network; it is reachable solely by internal containers.
+- **Named Volume (`mongodb_data`):** Data written to `/data/db` is persisted permanently on the host filesystem across container removals and restarts.
+
+---
+
+## CI/CD Pipeline
+
+The project includes pre-configured GitHub Actions workflows in `.github/workflows/`:
+
+### 1. Automated Testing (`.github/workflows/test.yml`)
+- Triggers on every push and pull request to `main`.
+- Spins up an active `mongo:7.0` service container.
+- Installs dependencies and executes `npm test`.
+
+### 2. Build & Deploy (`.github/workflows/deploy.yml`)
+- Builds the production multi-stage Docker image.
+- Authenticates and publishes to Docker Hub (`aditya5005/todo-api:latest`).
+- Connects to the remote production server via SSH, pulls the new image, and triggers a zero-downtime restart with `docker compose up -d`.
+
+### Docker Hub Registry
+- **Published Image:** [`docker.io/aditya5005/todo-api:latest`](https://hub.docker.com/r/aditya5005/todo-api)
