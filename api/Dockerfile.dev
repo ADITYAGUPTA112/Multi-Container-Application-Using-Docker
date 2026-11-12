@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install curl for diagnostics
+RUN apk add --no-cache curl
+
+# Copy dependency manifests
+COPY package*.json ./
+
+# Install all dependencies including devDependencies (nodemon)
+RUN npm install
+
+# Copy application source code
+COPY . .
+
+# Expose internal API port
+EXPOSE 5000
+
+# Start with nodemon for hot-reloading
+CMD ["npm", "run", "dev"]

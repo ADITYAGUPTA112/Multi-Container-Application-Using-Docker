@@ -1,0 +1,171 @@
+---
+- name: Configure Production Server & Deploy Multi-Container Stack
+  hosts: webservers
+  become: yes
+
+  vars:
+    app_directory: /opt/todo-app
+    docker_packages:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - software-properties-common
+      - ufw
+      - git
+      - htop
+
+  tasks:
+    # ==========================================
+    # 1. System Upgrades & Dependencies
+    # ==========================================
+    - name: Update apt repository cache
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install required baseline system packages
+      apt:
+        name: "{{ docker_packages }}"
+        state: present
+
+    # ==========================================
+    # 2. Host Firewall Configuration (UFW)
+    # ==========================================
+    - name: Configure UFW to allow OpenSSH
+      ufw:
+        rule: allow
+        name: OpenSSH
+
+    - name: Configure UFW to allow HTTP (Port 80)
+      ufw:
+        rule: allow
+        port: '80'
+        proto: tcp
+
+    - name: Configure UFW to allow HTTPS (Port 443)
+      ufw:
+        rule: allow
+        port: '443'
+        proto: tcp
+
+    - name: Enable UFW firewall
+      ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+
+    # ==========================================
+    # 3. Official Docker Engine & Compose Install
+    # ==========================================
+    - name: Create directory for Docker GPG keyring
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Download official Docker GPG key
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+
+    - name: Add Docker official apt repository
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+        filename: docker
+
+    - name: Install Docker CE and Docker Compose plugin
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker service is started and enabled on boot
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    # ==========================================
+    # 4. Deployer User Setup
+    # ==========================================
+    - name: Create non-root deployer user
+      user:
+        name: deployer
+        groups: docker,sudo
+        append: yes
+        shell: /bin/bash
+        state: present
+
+    # ==========================================
+    # 5. Application Directory & Deployment
+    # ==========================================
+    - name: Create application directory at {{ app_directory }}
+      file:
+        path: "{{ app_directory }}"
+        state: directory
+        owner: deployer
+        group: docker
+        mode: '0755'
+
+    - name: Copy production docker-compose file to remote host
+      copy:
+        src: ../docker-compose.prod.yml
+        dest: "{{ app_directory }}/docker-compose.yml"
+        owner: deployer
+        group: docker
+        mode: '0644'
+
+    - name: Copy proxy directory to remote host
+      copy:
+        src: ../proxy
+        dest: "{{ app_directory }}/"
+        owner: deployer
+        group: docker
+        mode: '0755'
+
+    - name: Copy client directory to remote host
+      copy:
+        src: ../client
+        dest: "{{ app_directory }}/"
+        owner: deployer
+        group: docker
+        mode: '0755'
+
+    - name: Copy API directory to remote host
+      copy:
+        src: ../api
+        dest: "{{ app_directory }}/"
+        owner: deployer
+        group: docker
+        mode: '0755'
+
+    - name: Build and launch multi-container stack via Docker Compose
+      command: docker compose -f {{ app_directory }}/docker-compose.yml up -d --build --remove-orphans
+      args:
+        chdir: "{{ app_directory }}"
+
+    # ==========================================
+    # 6. Service Verification
+    # ==========================================
+    - name: Wait for API service to become healthy (up to 30s)
+      uri:
+        url: http://localhost/health
+        status_code: 200
+        return_content: yes
+      register: health_check
+      retries: 6
+      delay: 5
+      until: health_check.status == 200
+
+    - name: Print deployment confirmation
+      debug:
+        msg: "Multi-container application successfully deployed and responding on Port 80! Status: {{ health_check.json.status }}"

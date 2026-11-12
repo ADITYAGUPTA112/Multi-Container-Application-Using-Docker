@@ -1,0 +1,58 @@
+services:
+  reverse-proxy:
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    container_name: todo-reverse-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    networks:
+      - todo_network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: todo-api-prod
+    restart: unless-stopped
+    expose:
+      - "5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - MONGO_URI=mongodb://mongodb:27017/todos_db
+      - CLIENT_ORIGIN=*
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - todo_network
+
+  mongodb:
+    image: mongo:7.0
+    container_name: todo-mongodb-prod
+    restart: unless-stopped
+    expose:
+      - "27017"
+    volumes:
+      - mongodb_data_prod:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - todo_network
+
+networks:
+  todo_network:
+    name: todo_network_prod
+    driver: bridge
+
+volumes:
+  mongodb_data_prod:
+    name: mongodb_data_prod
