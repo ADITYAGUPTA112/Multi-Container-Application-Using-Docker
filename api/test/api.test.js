@@ -63,11 +63,17 @@ const makeRequest = (path, options = {}) => {
   });
 };
 
-test('GET / returns 200 and service metadata', async () => {
-  const res = await makeRequest('/');
+test('GET /api returns 200 and service metadata', async () => {
+  const res = await makeRequest('/api');
   assert.equal(res.status, 200);
   assert.equal(res.body.status, 'online');
   assert.equal(res.body.version, '1.0.0');
+});
+
+test('GET / returns 200 and serves HTML dashboard', async () => {
+  const res = await makeRequest('/');
+  assert.equal(res.status, 200);
+  assert.ok(typeof res.body === 'string' && res.body.includes('Multi-Container Todo Platform'));
 });
 
 test('GET /health returns valid diagnostic schema', async () => {

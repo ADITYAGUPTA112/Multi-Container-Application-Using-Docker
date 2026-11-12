@@ -36,6 +36,7 @@ COPY --from=builder --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/package.json ./package.json
 COPY --from=builder --chown=node:node /app/server.js ./server.js
 COPY --from=builder --chown=node:node /app/src ./src
+COPY --from=builder --chown=node:node /app/public ./public
 
 # Drop privileges to standard non-root node user (Security specification)
 USER node
