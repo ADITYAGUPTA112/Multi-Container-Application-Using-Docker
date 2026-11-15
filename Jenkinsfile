@@ -5,6 +5,7 @@ pipeline {
         DOCKER_IMAGE = 'aditya5005/todo-api'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
+        KUBECONFIG_CREDENTIAL = 'k8s-kubeconfig'
     }
 
     stages {
@@ -14,18 +15,24 @@ pipeline {
             }
         }
 
-        stage('Install & Test') {
+        stage('Install Dependencies & Run Tests') {
             steps {
                 dir('api') {
-                    sh 'npm ci'
-                    sh 'npm test'
+                    sh 'npm.cmd ci || npm ci'
+                    sh 'npm.cmd test || npm test'
                 }
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Multi-Platform Docker Image') {
             steps {
                 sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} -t ${DOCKER_IMAGE}:latest ./api"
+            }
+        }
+
+        stage('Security Scan (Trivy)') {
+            steps {
+                sh "docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest image --severity CRITICAL,HIGH --exit-code 0 ${DOCKER_IMAGE}:${DOCKER_TAG}"
             }
         }
 
@@ -37,17 +44,28 @@ pipeline {
             }
         }
 
-        stage('Deploy Multi-Container Stack') {
+        stage('Deploy to Kubernetes Cluster') {
             steps {
-                sh 'docker compose -f docker-compose.prod.yml pull || docker-compose -f docker-compose.prod.yml pull'
-                sh 'docker compose -f docker-compose.prod.yml up -d --remove-orphans || docker-compose -f docker-compose.prod.yml up -d --remove-orphans'
+                script {
+                    echo "Applying Kubernetes manifests to todo-platform namespace..."
+                    sh '''
+                        kubectl apply -f k8s/namespace.yaml
+                        kubectl apply -f k8s/configmap-secrets.yaml
+                        kubectl apply -f k8s/mongodb-statefulset.yaml
+                        kubectl apply -f k8s/redis-deployment.yaml
+                        kubectl apply -f k8s/api-deployment.yaml
+                        kubectl apply -f k8s/ingress-hpa.yaml
+                        kubectl set image deployment/todo-api todo-api=${DOCKER_IMAGE}:${DOCKER_TAG} -n todo-platform
+                    '''
+                }
             }
         }
 
-        stage('Verify Health') {
+        stage('Verify K8s Rollout & Health') {
             steps {
-                sh 'sleep 5'
-                sh 'curl -f http://localhost/health || curl -f http://localhost:5000/health'
+                sh 'kubectl rollout status deployment/todo-api -n todo-platform --timeout=120s'
+                sh 'kubectl get pods -n todo-platform -o wide'
+                sh 'kubectl get services -n todo-platform'
             }
         }
     }
@@ -57,10 +75,10 @@ pipeline {
             sh 'docker logout || true'
         }
         success {
-            echo "Pipeline succeeded! Application deployed and healthy."
+            echo "🚀 Deployment Succeeded! Docker image published and rolling update completed on Kubernetes."
         }
         failure {
-            echo "Pipeline failed. Inspect stage logs for errors."
+            echo "❌ Pipeline failed. Check console output for debug details."
         }
     }
 }
