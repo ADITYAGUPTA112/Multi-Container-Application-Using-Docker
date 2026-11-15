@@ -39,3 +39,6 @@ Thumbs.db
 logs/
 api/logs/
 *.log
+
+# GitHub Workflows (avoid PAT workflow scope requirement)
+.github/
