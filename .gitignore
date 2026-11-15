@@ -34,3 +34,8 @@ override.tf.json
 Thumbs.db
 .vscode/
 .idea/
+
+# Application Logs
+logs/
+api/logs/
+*.log
