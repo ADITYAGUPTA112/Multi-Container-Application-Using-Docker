@@ -153,15 +153,7 @@
   .skel { height: 72px; border-radius: 8px; background: linear-gradient(100deg, var(--s) 30%, var(--s-high) 50%, var(--s) 70%) 0 0 / 220% 100%; animation: shimmer 1.8s ease-in-out infinite; border: 1px solid rgba(68,71,73,.4); }
   @keyframes shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
 
-  /* Overlays */
-  .scrim { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.6); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); display: grid; place-items: center; padding: 16px; }
-  .modal { width: 100%; max-width: 420px; background: rgba(53,53,52,.82); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,.10); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.5); padding: 28px; animation: pop .2s ease-out both; }
-  @keyframes pop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
-  .tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--outline-var); }
-  .tabs button { height: 40px; background: none; border: 0; color: var(--on-var); font: 500 13px 'Inter', sans-serif; cursor: pointer; }
-  .tabs button[aria-selected="true"] { color: var(--on); }
-  .tabs .ink { position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px; background: var(--primary); transition: transform .2s var(--ease); }
-  .banner { padding: 10px 12px; border-radius: 4px; background: var(--err-c); color: var(--on-err-c); font-size: 12px; }
+  /* Drawer & Toast */
   .drawer-scrim { position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,.55); }
   .toast { position: fixed; z-index: 80; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 16px; padding: 10px 14px 10px 16px; background: var(--s-highest); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,.5); animation: enter .2s var(--ease) both; max-width: calc(100vw - 32px); }
 
@@ -203,6 +195,7 @@
         <span class="mono tnum hidden sm:inline" id="healthText">Checking cluster…</span>
         <span class="mono tnum sm:hidden" id="healthTextShort">…</span>
       </div>
+      <a class="btn" id="signInLink" href="/auth.html" style="height: 36px; padding: 0 14px; font-size: 12px; background: var(--primary); color: var(--on-primary); text-decoration: none;" hidden>Sign in</a>
       <div class="flex items-center gap-2" id="userChip" hidden>
         <div class="avatar" id="avatar">A</div>
         <div class="hidden md:block leading-tight">
@@ -295,38 +288,6 @@
   </div>
 </div>
 
-<div class="scrim" id="authScrim" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
-    <div class="brand" id="authTitle">KubeOps <em>Todo Engine</em></div>
-    <p class="m-0 mt-1" style="color: var(--on-var); font-size: 13px;">Each account gets its own isolated task collection.</p>
-    <div class="tabs mt-5" role="tablist">
-      <button role="tab" id="tabIn" aria-selected="true">Sign in</button>
-      <button role="tab" id="tabUp" aria-selected="false">Create account</button>
-      <span class="ink" id="tabInk"></span>
-    </div>
-    <form id="authForm" class="flex flex-col gap-4 mt-5" autocomplete="on">
-      <div id="nameRow" hidden>
-        <label class="label block pb-1" for="authName" style="color: var(--on-var);">Full name</label>
-        <input class="input" id="authName" name="name" autocomplete="name" style="font-family: Inter, sans-serif; font-size: 14px;">
-      </div>
-      <div>
-        <label class="label block pb-1" for="authId" style="color: var(--on-var);">Email or username</label>
-        <input class="input" id="authId" name="username" autocomplete="username" required style="font-family: Inter, sans-serif; font-size: 14px;">
-      </div>
-      <div>
-        <label class="label block pb-1" for="authPw" style="color: var(--on-var);">Password</label>
-        <div class="relative">
-          <input class="input" id="authPw" name="password" type="password" autocomplete="current-password" minlength="6" required style="font-family: Inter, sans-serif; font-size: 14px; padding-right: 48px;">
-          <button type="button" class="iconbtn" id="pwToggle" aria-label="Show password" style="position: absolute; right: 6px; top: 6px;"><svg class="i" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
-        </div>
-        <div class="label pt-1" id="pwHint" style="color: var(--on-var);" hidden>At least 6 characters.</div>
-      </div>
-      <div class="banner" id="authErr" role="alert" hidden></div>
-      <button class="btn primary w-full" id="authBtn" type="submit"><span>Sign in</span></button>
-    </form>
-  </div>
-</div>
-
 <div class="toast" id="toast" role="status" hidden>
   <span class="label" id="toastMsg"></span>
   <button class="btn" id="toastUndo" style="height: 32px; padding: 0 12px;" hidden>Undo</button>
@@ -338,6 +299,7 @@
   const CONFIG = {
     apiBase: (window.KUBEOPS_CONFIG && window.KUBEOPS_CONFIG.apiBase) || '',   // '' = same origin (Nginx proxy)
     docsUrl: '/api-docs', metricsUrl: '/metrics', topologyUrl: '/topology.html', auditUrl: '/logs.html',
+    authUrl: '/auth.html',
     healthEveryMs: 8000, tokenKey: 'kubeops_token', userKey: 'kubeops_user'
   };
   const SCOPES = ['DevOps', 'Infrastructure', 'Database', 'Security', 'Backend'];
@@ -350,14 +312,12 @@
     Backend: '<svg class="i" viewBox="0 0 24 24"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"/></svg>',
     bolt: '<svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>',
     trash: '<svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6"/></svg>',
-    check: '<svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg>',
-    eye: '<svg class="i" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
-    eyeOff: '<svg class="i" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.2-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>'
+    check: '<svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg>'
   };
 
   /* ---------- State ---------- */
   const $ = (id) => document.getElementById(id);
-  const state = { todos: [], scope: 'All', priority: 'Medium', token: null, user: null, demo: false, cached: false, mode: 'login', pods: 3 };
+  const state = { todos: [], scope: 'All', priority: 'Medium', token: null, user: null, demo: false, cached: false, pods: 3 };
   const store = {
     get(k) { try { return localStorage.getItem(k); } catch { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch {} },
@@ -391,7 +351,7 @@
     createdAt: t.createdAt || t.created_at || t.timestamp || Date.now()
   });
 
-  /* ---------- Demo data (used when the API is unreachable) ---------- */
+  /* ---------- Demo data ---------- */
   const ago = (m) => Date.now() - m * 60000;
   const demoSeed = () => ([
     { id: 'd1', title: 'Roll out HPA tuning for the API deployment', completed: false, priority: 'High', scope: 'DevOps', createdAt: ago(18) },
@@ -527,21 +487,18 @@
   function initials(n) { return (n || 'U').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase(); }
   function setUser(name, role) {
     state.user = { name, role };
+    $('signInLink').hidden = true;
     $('userChip').hidden = false; $('avatar').textContent = initials(name);
     $('userName').textContent = name; $('userRole').textContent = role;
   }
   function jwtName(token) {
     try { const p = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); return p.name || p.username || p.email || p.sub || null; } catch { return null; }
   }
-  function openAuth(open) { $('authScrim').hidden = !open; if (open) setTimeout(() => $('authId').focus(), 50); }
   function signOut() {
     store.del(CONFIG.tokenKey); store.del(CONFIG.userKey);
     store.del('todo_access_token'); store.del('todo_user');
-    state.token = null; state.user = null; state.todos = []; $('userChip').hidden = true; renderAll(false);
-    if (state.demo) { startDemo(); } else { openAuth(true); }
-  }
-  function startDemo() {
-    state.token = null; state.cached = true; state.todos = demoSeed(); setUser('Aditya', 'demo tenant'); renderAll(true);
+    state.token = null; state.user = null; state.todos = [];
+    location.href = CONFIG.authUrl;
   }
 
   async function loadTodos() {
@@ -565,8 +522,11 @@
     const body = { title, priority: state.priority.toLowerCase(), scope: $('scopeSelect').value };
     try {
       let created;
-      if (state.demo) { created = { id: 'd' + Date.now(), ...body, completed: false, createdAt: Date.now() }; }
-      else { const { data } = await api('/todos', { method: 'POST', body }); created = norm((data && (data.todo || data.data)) || data || {}); if (!created.id) created = { ...created, id: 'n' + Date.now() }; if (!created.title) created.title = title; created.priority = created.priority || state.priority; }
+      const { data } = await api('/todos', { method: 'POST', body });
+      created = norm((data && (data.todo || data.data)) || data || {});
+      if (!created.id) created = { ...created, id: 'n' + Date.now() };
+      if (!created.title) created.title = title;
+      created.priority = created.priority || state.priority;
       state.todos.unshift(created); state.cached = false; $('taskInput').value = ''; renderAll(true); toast('Task added');
     } catch (e) { if (e.status === 401) { signOut(); } else toast('Could not add task. ' + e.message); }
     btn.disabled = false; btn.innerHTML = ICON_PLUS + '<span>Add task</span>';
@@ -575,7 +535,6 @@
   async function toggleTask(id) {
     const t = state.todos.find((x) => String(x.id) === String(id)); if (!t) return;
     t.completed = !t.completed; renderAll(false);
-    if (state.demo) return;
     try { await api('/todos/' + encodeURIComponent(id), { method: 'PATCH', body: { completed: t.completed, isCompleted: t.completed } }); }
     catch (e) { t.completed = !t.completed; renderAll(false); toast('Could not update task. ' + e.message); }
   }
@@ -587,45 +546,11 @@
     let undone = false;
     const commit = async () => {
       clearTimeout(pendingDelete && pendingDelete.timer); pendingDelete = null;
-      if (undone || state.demo) return;
+      if (undone) return;
       try { await api('/todos/' + encodeURIComponent(removed.id), { method: 'DELETE' }); } catch (e) { state.todos.splice(idx, 0, removed); renderAll(false); toast('Could not delete task. ' + e.message); }
     };
     pendingDelete = { commit, timer: setTimeout(commit, 5000) };
     toast('Task deleted', () => { undone = true; clearTimeout(pendingDelete && pendingDelete.timer); pendingDelete = null; state.todos.splice(idx, 0, removed); renderAll(false); });
-  }
-
-  /* ---------- Auth form ---------- */
-  function setMode(mode) {
-    state.mode = mode; const up = mode === 'register';
-    $('tabIn').setAttribute('aria-selected', String(!up)); $('tabUp').setAttribute('aria-selected', String(up));
-    $('tabInk').style.transform = up ? 'translateX(100%)' : 'none';
-    $('nameRow').hidden = !up; $('pwHint').hidden = !up; $('authErr').hidden = true;
-    $('authBtn').firstElementChild.textContent = up ? 'Create account' : 'Sign in';
-    $('authPw').autocomplete = up ? 'new-password' : 'current-password';
-  }
-  async function submitAuth(ev) {
-    ev.preventDefault();
-    const id = $('authId').value.trim(), pw = $('authPw').value, name = $('authName').value.trim();
-    const btn = $('authBtn'); const label = btn.firstElementChild.textContent;
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; $('authErr').hidden = true;
-    try {
-      const path = state.mode === 'register' ? '/auth/register' : '/auth/login';
-      const body = state.mode === 'register' ? { name: name || id, username: id, email: id.includes('@') ? id : undefined, password: pw } : { username: id, email: id.includes('@') ? id : undefined, password: pw };
-      const { data } = await api(path, { method: 'POST', body });
-      const token = data && (data.token || data.accessToken || data.access_token || (data.data && (data.data.accessToken || data.data.token)));
-      if (!token) throw new Error('The server did not return a session token.');
-      state.token = token;
-      store.set(CONFIG.tokenKey, token);
-      store.set('todo_access_token', token);
-      const display = (data.user && (data.user.name || data.user.username)) || (data.data && data.data.user && data.data.user.name) || name || jwtName(token) || id;
-      store.set(CONFIG.userKey, display);
-      store.set('todo_user', JSON.stringify({ name: display, email: id }));
-      setUser(display, (data.user && data.user.role) || (data.data && data.data.user && data.data.user.role) || 'tenant');
-      openAuth(false); $('authForm').reset(); await loadTodos();
-    } catch (e) {
-      $('authErr').textContent = e.name === 'AbortError' ? 'The server took too long to respond. Try again.' : e.message; $('authErr').hidden = false;
-    }
-    btn.disabled = false; btn.innerHTML = '<span>' + label + '</span>';
   }
 
   /* ---------- Wiring ---------- */
@@ -642,13 +567,10 @@
       b.dataset.act === 'toggle' ? toggleTask(id) : deleteTask(id);
     });
     $('signOut').addEventListener('click', signOut);
-    $('tabIn').addEventListener('click', () => setMode('login')); $('tabUp').addEventListener('click', () => setMode('register'));
-    $('authForm').addEventListener('submit', submitAuth);
-    $('pwToggle').addEventListener('click', () => { const show = $('authPw').type === 'password'; $('authPw').type = show ? 'text' : 'password'; $('pwToggle').innerHTML = show ? ICON.eyeOff : ICON.eye; $('pwToggle').setAttribute('aria-label', show ? 'Hide password' : 'Show password'); });
     const openDrawer = () => { $('sidebar').classList.add('open'); $('drawerScrim').hidden = false; };
     function closeDrawer() { $('sidebar').classList.remove('open'); $('drawerScrim').hidden = true; }
     $('menuBtn').addEventListener('click', openDrawer); $('drawerScrim').addEventListener('click', closeDrawer);
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (!$('authScrim').hidden && state.token) openAuth(false); closeDrawer(); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
     window.closeDrawer = closeDrawer;
   }
   function closeDrawer() { window.closeDrawer && window.closeDrawer(); }
@@ -656,13 +578,17 @@
   /* ---------- Boot ---------- */
   async function boot() {
     wire(); setHpa(state.pods); renderScopes(); showSkeleton();
-    const online = await pollHealth();
+    pollHealth();
     setInterval(pollHealth, CONFIG.healthEveryMs);
-    if (!online && state.demo) { startDemo(); return; }
     const token = store.get(CONFIG.tokenKey) || store.get('todo_access_token');
     if (token) {
-      state.token = token; setUser(store.get(CONFIG.userKey) || jwtName(token) || 'User', 'tenant'); await loadTodos();
-    } else { renderAll(false); openAuth(true); }
+      state.token = token;
+      setUser(store.get(CONFIG.userKey) || jwtName(token) || 'User', 'tenant');
+      await loadTodos();
+    } else {
+      // Direct redirect to dedicated auth.html page
+      location.href = CONFIG.authUrl;
+    }
   }
   boot();
 })();
