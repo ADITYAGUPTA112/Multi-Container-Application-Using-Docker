@@ -30,17 +30,51 @@ winston.addColors(colors);
 
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Ensure the logs directory exists
-const logsDir = path.join(process.cwd(), 'logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
+// In containers (where user is non-root node), write logs to /tmp/logs if /app/logs is not writable
+let logsDir = path.join(process.cwd(), 'logs');
+try {
+  if (!fs.existsSync(logsDir)) {
+    fs.mkdirSync(logsDir, { recursive: true });
+  }
+} catch (e) {
+  logsDir = path.join('/tmp', 'logs');
+  try {
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+  } catch (err) {
+    // If still fails, logsDir will just be disabled
+  }
+}
+
+const transports = [
+  new winston.transports.Console({
+    format: isProduction
+      ? combine(timestamp(), errors({ stack: true }), json())
+      : combine(colorize({ all: true }), simple()),
+  }),
+];
+
+try {
+  if (fs.existsSync(logsDir)) {
+    transports.push(
+      new winston.transports.File({
+        filename: path.join(logsDir, 'error.log'),
+        level: 'error',
+        format: combine(timestamp(), errors({ stack: true }), json()),
+      }),
+      new winston.transports.File({
+        filename: path.join(logsDir, 'combined.log'),
+        format: combine(timestamp(), errors({ stack: true }), json()),
+      })
+    );
+  }
+} catch (e) {
+  // Console logging is always available
 }
 
 /**
  * Winston structured logger instance.
- * - Base format: combine(timestamp, errors({stack:true}), json())
- * - Console transport: colorized simple format in development; JSON in production
- * - File transports: error.log (level: 'error'), combined.log (all levels)
  */
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || (isProduction ? 'info' : 'debug'),
@@ -50,27 +84,11 @@ const logger = winston.createLogger({
     errors({ stack: true }),
     json()
   ),
-  transports: [
-    new winston.transports.Console({
-      format: isProduction
-        ? combine(timestamp(), errors({ stack: true }), json())
-        : combine(colorize({ all: true }), simple()),
-    }),
-    new winston.transports.File({
-      filename: path.join(logsDir, 'error.log'),
-      level: 'error',
-      format: combine(timestamp(), errors({ stack: true }), json()),
-    }),
-    new winston.transports.File({
-      filename: path.join(logsDir, 'combined.log'),
-      format: combine(timestamp(), errors({ stack: true }), json()),
-    }),
-  ],
+  transports,
 });
 
 /**
  * Stream object for HTTP logging integration with Morgan.
- * Passes incoming HTTP request logs directly to logger.http.
  */
 const httpStream = {
   write: (message) => {
