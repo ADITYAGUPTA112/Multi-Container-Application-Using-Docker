@@ -5,6 +5,7 @@ pipeline {
         DOCKER_IMAGE = 'aditya5005/todo-api'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
+        KUBECONFIG = 'C:\\Users\\ag683\\.kube\\config'
     }
 
     stages {
@@ -53,8 +54,10 @@ pipeline {
                         kubectl rollout status deployment/todo-api -n todo-platform --timeout=60s
                     ) else (
                         echo [Deploy] No active Kubernetes cluster found. Deploying via Docker Compose Production Stack...
-                        docker-compose -f docker-compose.prod.yml pull || docker compose -f docker-compose.prod.yml pull
-                        docker-compose -f docker-compose.prod.yml up -d --remove-orphans || docker compose -f docker-compose.prod.yml up -d --remove-orphans
+                        docker stop todo-api-prod > nul 2>&1 || ver > nul
+                        docker rm -f todo-api-prod > nul 2>&1 || ver > nul
+                        docker compose -p aae -f docker-compose.prod.yml pull || docker-compose -p aae -f docker-compose.prod.yml pull
+                        docker compose -p aae -f docker-compose.prod.yml up -d --remove-orphans || docker-compose -p aae -f docker-compose.prod.yml up -d --remove-orphans
                     )
                 '''
             }
@@ -65,10 +68,11 @@ pipeline {
                 bat '''
                     kubectl cluster-info > nul 2>&1
                     if %ERRORLEVEL% EQU 0 (
+                        echo [Verify] Fetching Kubernetes Pods and Services...
                         kubectl get pods -n todo-platform
                         kubectl get services -n todo-platform
                     ) else (
-                        docker-compose -f docker-compose.prod.yml ps || docker compose -f docker-compose.prod.yml ps
+                        docker compose -p aae -f docker-compose.prod.yml ps || docker-compose -p aae -f docker-compose.prod.yml ps
                     )
                 '''
             }
@@ -80,10 +84,10 @@ pipeline {
             bat 'docker logout || ver > nul'
         }
         success {
-            echo "🚀 Deployment Succeeded! Code tested, Docker image published to Docker Hub, and services deployed."
+            echo "=== Deployment Succeeded! Code tested, Docker image published to Docker Hub, and services deployed. ==="
         }
         failure {
-            echo "❌ Pipeline failed. Check console output for debug details."
+            echo "=== Pipeline failed. Check console output for debug details. ==="
         }
     }
 }
