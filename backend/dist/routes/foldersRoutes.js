@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const foldersController_1 = require("../controllers/foldersController");
+const auth_1 = require("../middleware/auth");
+const validate_1 = require("../middleware/validate");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateJwt);
+router.get('/', foldersController_1.listFolders);
+router.post('/', (0, validate_1.validate)(foldersController_1.createFolderSchema), foldersController_1.createFolder);
+router.put('/:id', (0, validate_1.validate)(foldersController_1.updateFolderSchema), foldersController_1.updateFolder);
+router.delete('/:id', foldersController_1.deleteFolder);
+exports.default = router;

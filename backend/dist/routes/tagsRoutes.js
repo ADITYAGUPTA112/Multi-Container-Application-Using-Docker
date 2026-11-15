@@ -1,0 +1,12 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const tagsController_1 = require("../controllers/tagsController");
+const auth_1 = require("../middleware/auth");
+const validate_1 = require("../middleware/validate");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateJwt);
+router.get('/', tagsController_1.listTags);
+router.post('/', (0, validate_1.validate)(tagsController_1.createTagSchema), tagsController_1.createTag);
+router.delete('/:id', tagsController_1.deleteTag);
+exports.default = router;

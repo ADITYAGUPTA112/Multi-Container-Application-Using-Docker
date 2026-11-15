@@ -67,7 +67,7 @@ test('GET /api returns 200 and service metadata', async () => {
   const res = await makeRequest('/api');
   assert.equal(res.status, 200);
   assert.equal(res.body.status, 'online');
-  assert.equal(res.body.version, '1.0.0');
+  assert.equal(res.body.version, '2.0.0');
 });
 
 test('GET / returns 200 and serves HTML dashboard', async () => {

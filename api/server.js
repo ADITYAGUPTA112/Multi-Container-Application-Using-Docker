@@ -2,16 +2,21 @@ require('dotenv').config();
 
 const app = require('./src/app');
 const { connectWithRetry, closeDatabaseConnection } = require('./src/config/db');
+const { closeRedisConnection } = require('./src/config/redis');
+const { initializeSocket } = require('./src/services/socket');
 
 const PORT = process.env.PORT || 5000;
 
 // Start server
 const server = app.listen(PORT, async () => {
   console.log(`===============================================`);
-  console.log(` Multi-Container Todo API Service`);
+  console.log(` Multi-Container Todo API Service v2.0.0`);
   console.log(` Running on port: http://localhost:${PORT}`);
   console.log(` Environment:     ${process.env.NODE_ENV || 'development'}`);
   console.log(`===============================================`);
+
+  // Initialize Socket.IO real-time server
+  initializeSocket(server);
 
   // Initialize resilient database connection loop
   await connectWithRetry();
@@ -24,6 +29,7 @@ const handleGracefulShutdown = async (signal) => {
   server.close(async () => {
     console.log('[Server] HTTP server closed.');
     await closeDatabaseConnection();
+    await closeRedisConnection();
     console.log('[Server] Graceful shutdown process complete. Exiting.');
     process.exit(0);
   });

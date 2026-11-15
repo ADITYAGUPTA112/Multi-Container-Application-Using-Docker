@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const notesController_1 = require("../controllers/notesController");
+const auth_1 = require("../middleware/auth");
+const validate_1 = require("../middleware/validate");
+const router = (0, express_1.Router)();
+// Protect all note routes
+router.use(auth_1.authenticateJwt);
+router.get('/', notesController_1.listNotes);
+router.post('/', (0, validate_1.validate)(notesController_1.createNoteSchema), notesController_1.createNote);
+router.get('/:id', notesController_1.getNote);
+router.put('/:id', (0, validate_1.validate)(notesController_1.updateNoteSchema), notesController_1.updateNote);
+router.delete('/:id', notesController_1.deleteNote);
+router.patch('/:id/pin', notesController_1.togglePin);
+router.patch('/:id/archive', notesController_1.toggleArchive);
+router.patch('/:id/favorite', notesController_1.toggleFavorite);
+router.post('/:id/ai-tag', notesController_1.triggerAiTagging);
+router.post('/:id/accept-ai-tags', notesController_1.acceptAiTags);
+exports.default = router;

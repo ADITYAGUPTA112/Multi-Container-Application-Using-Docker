@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authRoutes_1 = __importDefault(require("./authRoutes"));
+const notesRoutes_1 = __importDefault(require("./notesRoutes"));
+const foldersRoutes_1 = __importDefault(require("./foldersRoutes"));
+const tagsRoutes_1 = __importDefault(require("./tagsRoutes"));
+const documentsRoutes_1 = __importDefault(require("./documentsRoutes"));
+const searchRoutes_1 = __importDefault(require("./searchRoutes"));
+const chatRoutes_1 = __importDefault(require("./chatRoutes"));
+const router = (0, express_1.Router)();
+router.use('/auth', authRoutes_1.default);
+router.use('/notes', notesRoutes_1.default);
+router.use('/folders', foldersRoutes_1.default);
+router.use('/tags', tagsRoutes_1.default);
+router.use('/documents', documentsRoutes_1.default);
+router.use('/search', searchRoutes_1.default);
+router.use('/chat', chatRoutes_1.default);
+exports.default = router;

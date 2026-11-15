@@ -1,0 +1,47 @@
+groups:
+  - name: todo-api-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: sum(rate(http_requests_total{status_code=~"5.."}[5m])) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High 5xx error rate detected"
+          description: "Rate of 5xx HTTP errors is {{ $value }} (greater than 0.05) for 5 minutes."
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High P95 latency detected"
+          description: "P95 latency is {{ $value }}s (greater than 1s) for 5 minutes."
+
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service instance down"
+          description: "Target {{ $labels.instance }} of job {{ $labels.job }} has been down for 1 minute."
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes > 536870912
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage detected"
+          description: "Process resident memory is {{ $value }} bytes (greater than 512MB) for 5 minutes."
+
+      - alert: MongoDBDown
+        expr: mongodb_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB is down"
+          description: "MongoDB exporter reports mongodb_up is 0 for 30 seconds."

@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const searchController_1 = require("../controllers/searchController");
+const auth_1 = require("../middleware/auth");
+const validate_1 = require("../middleware/validate");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateJwt);
+router.post('/', (0, validate_1.validate)(searchController_1.searchSchema), searchController_1.searchKnowledgeBase);
+exports.default = router;

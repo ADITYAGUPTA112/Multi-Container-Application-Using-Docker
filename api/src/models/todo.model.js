@@ -19,6 +19,28 @@ const todoSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+      index: true,
+    },
+    priority: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium',
+    },
+    dueDate: {
+      type: Date,
+      default: null,
+    },
+    tags: [
+      {
+        type: String,
+        trim: true,
+        maxlength: 50,
+      },
+    ],
   },
   {
     timestamps: true,
@@ -36,6 +58,7 @@ const todoSchema = new mongoose.Schema(
 // Indexes for query performance
 todoSchema.index({ createdAt: -1 });
 todoSchema.index({ isCompleted: 1 });
+todoSchema.index({ title: 'text', description: 'text' });
 
 const Todo = mongoose.model('Todo', todoSchema);
 

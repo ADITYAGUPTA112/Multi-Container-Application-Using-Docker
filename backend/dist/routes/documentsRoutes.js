@@ -1,0 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const documentsController_1 = require("../controllers/documentsController");
+const auth_1 = require("../middleware/auth");
+const router = (0, express_1.Router)();
+router.use(auth_1.authenticateJwt);
+router.post('/upload', documentsController_1.uploadMiddleware, documentsController_1.uploadDocument);
+router.get('/', documentsController_1.listDocuments);
+router.get('/:id', documentsController_1.getDocument);
+router.get('/:id/chunks', documentsController_1.getDocumentChunks);
+router.delete('/:id', documentsController_1.deleteDocument);
+exports.default = router;
