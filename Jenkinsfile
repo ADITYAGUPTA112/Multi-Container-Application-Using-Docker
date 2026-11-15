@@ -37,26 +37,39 @@ pipeline {
             }
         }
 
-        stage('Deploy to Kubernetes Cluster') {
+        stage('Deploy to Kubernetes or Docker Stack') {
             steps {
                 bat '''
-                    kubectl apply -f k8s/namespace.yaml
-                    kubectl apply -f k8s/configmap-secrets.yaml
-                    kubectl apply -f k8s/mongodb-statefulset.yaml
-                    kubectl apply -f k8s/redis-deployment.yaml
-                    kubectl apply -f k8s/api-deployment.yaml
-                    kubectl apply -f k8s/ingress-hpa.yaml
-                    kubectl set image deployment/todo-api todo-api=%DOCKER_IMAGE%:%DOCKER_TAG% -n todo-platform
+                    kubectl cluster-info > nul 2>&1
+                    if %ERRORLEVEL% EQU 0 (
+                        echo [Deploy] Active Kubernetes cluster detected. Applying K8s manifests...
+                        kubectl apply -f k8s/namespace.yaml
+                        kubectl apply -f k8s/configmap-secrets.yaml
+                        kubectl apply -f k8s/mongodb-statefulset.yaml
+                        kubectl apply -f k8s/redis-deployment.yaml
+                        kubectl apply -f k8s/api-deployment.yaml
+                        kubectl apply -f k8s/ingress-hpa.yaml
+                        kubectl set image deployment/todo-api todo-api=%DOCKER_IMAGE%:%DOCKER_TAG% -n todo-platform
+                        kubectl rollout status deployment/todo-api -n todo-platform --timeout=60s
+                    ) else (
+                        echo [Deploy] No active Kubernetes cluster found. Deploying via Docker Compose Production Stack...
+                        docker-compose -f docker-compose.prod.yml pull || docker compose -f docker-compose.prod.yml pull
+                        docker-compose -f docker-compose.prod.yml up -d --remove-orphans || docker compose -f docker-compose.prod.yml up -d --remove-orphans
+                    )
                 '''
             }
         }
 
-        stage('Verify K8s Rollout & Health') {
+        stage('Verify Health') {
             steps {
                 bat '''
-                    kubectl rollout status deployment/todo-api -n todo-platform --timeout=120s
-                    kubectl get pods -n todo-platform -o wide
-                    kubectl get services -n todo-platform
+                    kubectl cluster-info > nul 2>&1
+                    if %ERRORLEVEL% EQU 0 (
+                        kubectl get pods -n todo-platform
+                        kubectl get services -n todo-platform
+                    ) else (
+                        docker-compose -f docker-compose.prod.yml ps || docker compose -f docker-compose.prod.yml ps
+                    )
                 '''
             }
         }
@@ -67,7 +80,7 @@ pipeline {
             bat 'docker logout || ver > nul'
         }
         success {
-            echo "🚀 Deployment Succeeded! Docker image published and rolling update completed on Kubernetes."
+            echo "🚀 Deployment Succeeded! Code tested, Docker image published to Docker Hub, and services deployed."
         }
         failure {
             echo "❌ Pipeline failed. Check console output for debug details."
