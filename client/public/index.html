@@ -1,529 +1,326 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Multi-Container Todo Platform</title>
-<!-- Tailwind CSS v3 -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Google Fonts: Be Vietnam Pro & JetBrains Mono -->
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-<!-- Tailwind Configuration strictly from Design System -->
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "surface-variant": "#e2e2e6",
-          "on-primary-container": "#717374",
-          "on-tertiary-container": "#757270",
-          "surface-container-low": "#f3f3f7",
-          "secondary-fixed-dim": "#c9c6c5",
-          "surface-container-lowest": "#ffffff",
-          "on-surface-variant": "#444749",
-          "on-background": "#1a1c1f",
-          "on-primary-fixed-variant": "#454748",
-          "on-secondary": "#ffffff",
-          "primary": "#5d5e60",
-          "surface-bright": "#f9f9fd",
-          "on-primary-fixed": "#1a1c1d",
-          "tertiary": "#605e5c",
-          "tertiary-fixed-dim": "#cac6c3",
-          "on-secondary-fixed": "#1c1b1b",
-          "surface-container-high": "#e8e8ec",
-          "outline-variant": "#c4c7c9",
-          "surface-dim": "#d9dadd",
-          "inverse-primary": "#c6c6c7",
-          "secondary-container": "#e5e2e1",
-          "tertiary-fixed": "#e6e2df",
-          "tertiary-container": "#fef9f6",
-          "surface-tint": "#5d5e60",
-          "on-primary": "#ffffff",
-          "primary-fixed": "#e2e2e3",
-          "secondary": "#5f5e5e",
-          "on-tertiary-fixed-variant": "#484644",
-          "on-tertiary": "#ffffff",
-          "on-error": "#ffffff",
-          "surface": "#f9f9fd",
-          "surface-container": "#ededf1",
-          "error": "#ba1a1a",
-          "error-container": "#ffdad6",
-          "outline": "#747779",
-          "primary-fixed-dim": "#c6c6c7",
-          "background": "#f9f9fd",
-          "primary-container": "#fafafb",
-          "secondary-fixed": "#e5e2e1",
-          "on-secondary-container": "#656464",
-          "surface-container-highest": "#e2e2e6",
-          "on-tertiary-fixed": "#1c1b1a",
-          "on-error-container": "#93000a",
-          "inverse-surface": "#2e3033",
-          "inverse-on-surface": "#f0f0f4",
-          "on-surface": "#1a1c1f",
-          "on-secondary-fixed-variant": "#474646"
-        },
-        borderRadius: {
-          "DEFAULT": "9999px",
-          "lg": "9999px",
-          "xl": "9999px",
-          "2xl": "2rem",
-          "3xl": "2.5rem",
-          "full": "9999px"
-        },
-        fontFamily: {
-          sans: ['"Be Vietnam Pro"', 'sans-serif'],
-          mono: ['"JetBrains Mono"', 'monospace'],
-          "headline-lg": ['"Be Vietnam Pro"', 'sans-serif']
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Multi-Container Todo Platform | DevOps & K8s Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            "surface": "#f9f9fd",
+            "surface-bright": "#f9f9fd",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f3f3f7",
+            "surface-container": "#ededf1",
+            "surface-container-high": "#e8e8ec",
+            "surface-container-highest": "#e2e2e6",
+            "on-surface": "#1a1c1f",
+            "on-surface-variant": "#444749",
+            "outline": "#747779",
+            "outline-variant": "#c4c7c9",
+            "primary": "#2563eb",
+            "on-primary": "#ffffff",
+            "secondary": "#475569",
+            "on-secondary": "#ffffff",
+            "error": "#dc2626",
+            "on-error": "#ffffff",
+            "error-container": "#fee2e2",
+            "on-error-container": "#991b1b",
+            "inverse-surface": "#1e293b",
+            "inverse-on-surface": "#f8fafc"
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
         }
       }
+    };
+  </script>
+  <style>
+    body {
+      background-color: #f8fafc;
+      font-family: 'Inter', sans-serif;
     }
-  }
-</script>
-<style>
-  body {
-    background-color: #f9f9fd;
-    color: #1a1c1f;
-  }
-  .card-surface {
-    background-color: #ffffff;
-    border: 1px solid #e2e2e6;
-    box-shadow: 0 4px 20px -2px rgba(26, 28, 31, 0.04);
-  }
-  .subtle-input {
-    background-color: #f3f3f7;
-    border: 1px solid #e2e2e6;
-    color: #1a1c1f;
-    transition: all 0.2s ease;
-  }
-  .subtle-input:focus {
-    background-color: #ffffff;
-    border-color: #5d5e60;
-    box-shadow: 0 0 0 3px rgba(93, 94, 96, 0.12);
-    outline: none;
-  }
-</style>
+    .card-surface {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+    }
+    .subtle-input {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #0f172a;
+      transition: all 0.2s ease;
+    }
+    .subtle-input:focus {
+      background-color: #ffffff;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      outline: none;
+    }
+  </style>
 </head>
-<body class="bg-background text-on-surface antialiased font-sans min-h-screen py-8 px-4 sm:px-6 lg:px-8 selection:bg-surface-variant selection:text-on-surface">
+<body class="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen py-8 px-4 sm:px-6 lg:px-8">
 
-<!-- BEGIN: Toast Notifications -->
+<!-- Toast Notifications -->
 <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-<!-- ========================================== -->
-<!-- AUTH MODAL (Login & Signup)               -->
-<!-- ========================================== -->
-<div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 hidden">
-  <div class="card-surface rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-outline-variant relative animate-in fade-in zoom-in-95 duration-200">
-    <!-- Header with Toggle -->
-    <div class="flex items-center justify-between pb-4 border-b border-outline-variant">
-      <div>
-        <h2 id="auth-modal-title" class="text-xl font-bold tracking-tight text-on-surface">Sign In to Your Workspace</h2>
-        <p id="auth-modal-subtitle" class="text-xs text-on-surface-variant mt-0.5">Access your private multi-container todo pool</p>
-      </div>
-      <button id="auth-modal-close-btn" class="p-2 rounded-full hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition hidden">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </button>
-    </div>
-
-    <!-- Auth Error Alert -->
-    <div id="auth-error-box" class="mt-4 p-3 rounded-2xl bg-error-container text-on-error-container text-xs hidden flex items-center gap-2">
-      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke-width="2"/><line x1="12" y1="16" x2="12.01" y2="16" stroke-width="2"/></svg>
-      <span id="auth-error-text"></span>
-    </div>
-
-    <!-- Form -->
-    <form id="auth-form" class="mt-4 space-y-4">
-      <!-- Full Name (Signup Only) -->
-      <div id="auth-name-group" class="hidden">
-        <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">Full Name</label>
-        <input type="text" id="auth-name" placeholder="John Doe" class="subtle-input w-full px-4 py-2.5 rounded-2xl text-sm" />
-      </div>
-
-      <!-- Email -->
-      <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">Email Address</label>
-        <input type="email" id="auth-email" required placeholder="user@example.com" class="subtle-input w-full px-4 py-2.5 rounded-2xl text-sm" />
-      </div>
-
-      <!-- Password -->
-      <div>
-        <label class="block text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1.5">Password</label>
-        <input type="password" id="auth-password" required placeholder="••••••••" minlength="6" class="subtle-input w-full px-4 py-2.5 rounded-2xl text-sm" />
-      </div>
-
-      <!-- Submit Button -->
-      <button type="submit" id="auth-submit-btn" class="w-full py-3 px-5 rounded-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-medium text-sm transition shadow-sm flex items-center justify-center gap-2">
-        <span id="auth-submit-text">Sign In</span>
-      </button>
-    </form>
-
-    <!-- Switch between Login and Signup -->
-    <div class="mt-5 text-center text-xs text-on-surface-variant">
-      <span id="auth-switch-prompt">Don't have an account?</span>
-      <button type="button" id="auth-switch-btn" class="font-semibold text-primary hover:underline ml-1">Sign Up</button>
-    </div>
-  </div>
-</div>
-
-<!-- BEGIN: MainContainer -->
+<!-- Main Container -->
 <main class="max-w-5xl mx-auto space-y-6">
 
-<!-- BEGIN: HeaderSection -->
-<header class="card-surface rounded-3xl p-6 sm:p-7 border border-outline-variant relative overflow-hidden" data-purpose="platform-header">
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
-  <!-- Left: Logo & Platform Identity -->
-  <div class="flex items-start sm:items-center gap-4">
-    <div class="relative shrink-0 flex items-center justify-center w-14 h-14 rounded-full bg-surface-container border border-outline-variant shadow-sm text-on-surface">
-      <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-        <line x1="12" y1="22.08" x2="12" y2="12"></line>
-      </svg>
-    </div>
-    <div>
-      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-on-surface flex items-center gap-2">
-        Multi-Container Todo Platform
-      </h1>
-      <!-- Tech Stack Pills -->
-      <div class="flex flex-wrap items-center gap-2 mt-2 text-xs text-on-surface-variant">
-        <span class="inline-flex items-center px-3 py-0.5 rounded-full bg-surface-container-low text-on-surface-variant font-mono text-[11px] border border-outline-variant font-medium">Docker</span>
-        <span class="text-outline-variant">·</span>
-        <span class="inline-flex items-center px-3 py-0.5 rounded-full bg-surface-container-low text-on-surface-variant font-mono text-[11px] border border-outline-variant font-medium">Kubernetes</span>
-        <span class="text-outline-variant">·</span>
-        <span class="inline-flex items-center px-3 py-0.5 rounded-full bg-surface-container-low text-on-surface-variant font-mono text-[11px] border border-outline-variant font-medium">Jenkins</span>
-        <span class="text-outline-variant">·</span>
-        <span class="inline-flex items-center px-3 py-0.5 rounded-full bg-surface-container-low text-on-surface-variant font-mono text-[11px] border border-outline-variant font-medium">MongoDB</span>
-        <span class="text-outline-variant">·</span>
-        <span class="inline-flex items-center px-3 py-0.5 rounded-full bg-surface-container-low text-on-surface-variant font-mono text-[11px] border border-outline-variant font-medium">Redis</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Right: User Account Pill & Cluster Status -->
-  <div class="flex flex-wrap items-center gap-3 self-start md:self-center">
-    <!-- User Badge -->
-    <div id="user-badge" class="px-3.5 py-1.5 rounded-full flex items-center gap-2 border border-outline-variant bg-surface-container text-xs font-medium text-on-surface">
-      <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-      <span id="user-name-display">Guest</span>
-      <a href="/auth.html" id="auth-portal-btn" title="Open Auth Portal" class="ml-1 px-2.5 py-0.5 rounded-full bg-primary text-on-primary hover:bg-secondary font-semibold transition text-xs flex items-center gap-1">
-        <span class="material-symbols-outlined text-[14px]">login</span>
-        <span>Login</span>
-      </a>
-      <button id="logout-btn" title="Sign Out" class="hidden ml-1 text-on-surface-variant hover:text-error transition text-xs font-semibold">Logout</button>
-    </div>
-
-    <!-- Cluster Status Indicator Badge -->
-    <div class="px-4 py-2 rounded-full flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-semibold shadow-sm">
-      <span class="relative flex h-2 w-2">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-      </span>
-      <span id="cluster-status-text">Cluster Online</span>
-      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-      <span class="font-mono text-[11px] text-emerald-700" id="cluster-node-text">Isolated User Storage</span>
-    </div>
-  </div>
-</div>
-</header>
-<!-- END: HeaderSection -->
-
-<!-- BEGIN: MetricsOverview -->
-<section class="grid grid-cols-1 sm:grid-cols-3 gap-4" data-purpose="metrics-grid">
-  <!-- Metric 1: Total Tasks -->
-  <div class="card-surface rounded-2xl p-5 border border-outline-variant transition-all hover:shadow-md group">
-    <div class="flex justify-between items-start">
-      <span class="text-[11px] font-bold tracking-wider uppercase text-on-surface-variant">My Total Tasks</span>
-      <span class="p-2 rounded-full bg-surface-container text-on-surface-variant">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </span>
-    </div>
-    <div class="mt-2 flex items-baseline gap-2">
-      <span class="text-3xl font-bold tracking-tight text-on-surface" id="metric-total">0</span>
-      <span class="text-xs text-on-surface-variant font-mono">user pool</span>
-    </div>
-    <div class="mt-3.5 h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
-      <div class="h-full bg-primary rounded-full" style="width: 100%"></div>
-    </div>
-  </div>
-
-  <!-- Metric 2: Pending Tasks -->
-  <div class="card-surface rounded-2xl p-5 border border-outline-variant transition-all hover:shadow-md group">
-    <div class="flex justify-between items-start">
-      <span class="text-[11px] font-bold tracking-wider uppercase text-amber-800">Pending</span>
-      <span class="p-2 rounded-full bg-amber-50 text-amber-700">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </span>
-    </div>
-    <div class="mt-2 flex items-baseline gap-2">
-      <span class="text-3xl font-bold tracking-tight text-amber-700" id="metric-pending">0</span>
-      <span class="text-xs text-amber-800/70 font-mono">needs action</span>
-    </div>
-    <div class="mt-3.5 h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
-      <div id="metric-pending-bar" class="h-full bg-amber-500 rounded-full" style="width: 0%"></div>
-    </div>
-  </div>
-
-  <!-- Metric 3: Completed Tasks -->
-  <div class="card-surface rounded-2xl p-5 border border-outline-variant transition-all hover:shadow-md group">
-    <div class="flex justify-between items-start">
-      <span class="text-[11px] font-bold tracking-wider uppercase text-emerald-800">Completed</span>
-      <span class="p-2 rounded-full bg-emerald-50 text-emerald-700">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-      </span>
-    </div>
-    <div class="mt-2 flex items-baseline gap-2">
-      <span class="text-3xl font-bold tracking-tight text-emerald-700" id="metric-completed">0</span>
-      <span class="text-xs text-emerald-800/70 font-mono">done</span>
-    </div>
-    <div class="mt-3.5 h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
-      <div id="metric-completed-bar" class="h-full bg-emerald-500 rounded-full" style="width: 0%"></div>
-    </div>
-  </div>
-</section>
-<!-- END: MetricsOverview -->
-
-<!-- BEGIN: TodoCreationCard -->
-<section class="card-surface rounded-3xl p-6 sm:p-7 border border-outline-variant" data-purpose="task-creation-container">
-  <div class="flex items-center justify-between mb-4">
-    <div>
-      <h2 class="text-base sm:text-lg font-bold tracking-tight text-on-surface">Create New Task</h2>
-      <p class="text-xs text-on-surface-variant">Stored under your isolated account ID</p>
-    </div>
-    <span class="text-xs font-mono text-on-surface-variant bg-surface-container px-3 py-1 rounded-full border border-outline-variant">JWT Secure</span>
-  </div>
-
-  <form id="create-task-form" class="space-y-4">
-    <div class="space-y-2">
-      <input type="text" id="task-title-input" required placeholder="What needs to be done?" class="subtle-input w-full px-4 py-3 rounded-2xl text-sm placeholder:text-on-surface-variant/60" />
-      <textarea id="task-details-input" rows="2" placeholder="Task description or notes (optional)..." class="subtle-input w-full px-4 py-3 rounded-2xl text-sm placeholder:text-on-surface-variant/60 resize-none"></textarea>
-    </div>
-
-    <!-- Scope Pills & Submit Action Row -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-1">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-xs text-on-surface-variant font-medium mr-1">Scope:</span>
-        <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-inverse-surface text-inverse-on-surface border border-transparent font-medium shadow-sm transition" data-tag="DevOps">DevOps</button>
-        <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-surface-container-low text-on-surface-variant border border-outline-variant hover:bg-surface-container hover:text-on-surface transition font-medium" data-tag="Docker">Docker</button>
-        <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-surface-container-low text-on-surface-variant border border-outline-variant hover:bg-surface-container hover:text-on-surface transition font-medium" data-tag="K8s">K8s</button>
-        <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-surface-container-low text-on-surface-variant border border-outline-variant hover:bg-surface-container hover:text-on-surface transition font-medium" data-tag="Database">Database</button>
+  <!-- Header Section -->
+  <header class="card-surface rounded-3xl p-6 sm:p-7 border border-slate-200 relative overflow-hidden">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+      <!-- Left: Logo & Platform Identity -->
+      <div class="flex items-start sm:items-center gap-4">
+        <div class="relative shrink-0 flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 shadow-sm text-blue-600">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+            Multi-Container Platform
+          </h1>
+          <!-- Tech Stack Pills -->
+          <div class="flex flex-wrap items-center gap-2 mt-2 text-xs text-slate-600">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">Docker</span>
+            <span class="text-slate-400">·</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">Kubernetes</span>
+            <span class="text-slate-400">·</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">Jenkins</span>
+            <span class="text-slate-400">·</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">MongoDB</span>
+            <span class="text-slate-400">·</span>
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">Redis</span>
+          </div>
+        </div>
       </div>
 
-      <button type="submit" id="submit-btn" class="w-full sm:w-auto px-6 py-2.5 rounded-full bg-primary hover:bg-on-primary-fixed-variant text-on-primary font-medium text-xs transition shadow-sm flex items-center justify-center gap-2 self-end">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        <span id="submit-btn-text">Add Task</span>
-      </button>
-    </div>
-  </form>
-</section>
-<!-- END: TodoCreationCard -->
+      <!-- Right: Navigation Links & Cluster Status -->
+      <div class="flex flex-wrap items-center gap-3 self-start md:self-center">
+        <!-- Telemetry Links -->
+        <a href="/api-docs" target="_blank" class="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[15px]">api</span>
+          <span>Swagger</span>
+        </a>
+        <a href="/topology.html" class="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[15px]">hub</span>
+          <span>Mesh</span>
+        </a>
+        <a href="/logs.html" class="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[15px]">description</span>
+          <span>Logs</span>
+        </a>
 
-<!-- BEGIN: TodoListSection -->
-<section class="card-surface rounded-3xl p-6 sm:p-7 border border-outline-variant space-y-5" data-purpose="task-list-container">
-  <!-- Controls & Filter Toolbar -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-outline-variant">
-    <div class="flex items-center gap-2">
-      <h3 class="text-base font-bold tracking-tight text-on-surface">Active Task Queue</h3>
-      <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-medium" id="task-badge-count">0 items</span>
+        <!-- Cluster Status Indicator Badge -->
+        <div id="cluster-status-badge" class="px-4 py-2 rounded-full flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-semibold shadow-sm transition-colors duration-300">
+          <span class="relative flex h-2 w-2">
+            <span id="cluster-status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+            <span id="cluster-status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
+          </span>
+          <span id="cluster-status-text">Cluster Online</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span class="font-mono text-[11px] text-emerald-700" id="cluster-node-text">MongoDB: 1ms • Redis: 0ms</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Metrics Overview -->
+  <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <!-- Metric 1: Total Tasks -->
+    <div class="card-surface rounded-2xl p-5 border border-slate-200 transition-all hover:shadow-md">
+      <div class="flex justify-between items-start">
+        <span class="text-[11px] font-bold tracking-wider uppercase text-slate-500">Total Workloads</span>
+        <span class="p-2 rounded-full bg-slate-100 text-slate-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </div>
+      <div class="mt-2 flex items-baseline gap-2">
+        <span class="text-3xl font-bold tracking-tight text-slate-900" id="metric-total">0</span>
+        <span class="text-xs text-slate-500 font-mono">active pool</span>
+      </div>
+      <div class="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+        <div class="h-full bg-blue-600 rounded-full" style="width: 100%"></div>
+      </div>
     </div>
 
-    <!-- Filter Buttons -->
-    <div class="flex items-center p-1 bg-surface-container rounded-full text-xs font-medium text-on-surface-variant self-start sm:self-auto">
-      <button onclick="filterTasks('all')" id="filter-all" class="filter-tab px-4 py-1.5 rounded-full text-on-secondary bg-primary shadow-sm transition">All</button>
-      <button onclick="filterTasks('active')" id="filter-active" class="filter-tab px-4 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface transition">Active</button>
-      <button onclick="filterTasks('completed')" id="filter-completed" class="filter-tab px-4 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface transition">Completed</button>
+    <!-- Metric 2: Pending Tasks -->
+    <div class="card-surface rounded-2xl p-5 border border-slate-200 transition-all hover:shadow-md">
+      <div class="flex justify-between items-start">
+        <span class="text-[11px] font-bold tracking-wider uppercase text-amber-700">Pending Execution</span>
+        <span class="p-2 rounded-full bg-amber-50 text-amber-700">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </div>
+      <div class="mt-2 flex items-baseline gap-2">
+        <span class="text-3xl font-bold tracking-tight text-amber-700" id="metric-pending">0</span>
+        <span class="text-xs text-amber-700/70 font-mono">in progress</span>
+      </div>
+      <div class="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+        <div id="metric-pending-bar" class="h-full bg-amber-500 rounded-full" style="width: 0%"></div>
+      </div>
     </div>
-  </div>
 
-  <!-- Dynamic Tasks Container -->
-  <div id="todo-list" class="space-y-3">
-    <!-- Tasks will be injected here via JavaScript -->
-  </div>
-</section>
-<!-- END: TodoListSection -->
+    <!-- Metric 3: Completed Tasks -->
+    <div class="card-surface rounded-2xl p-5 border border-slate-200 transition-all hover:shadow-md">
+      <div class="flex justify-between items-start">
+        <span class="text-[11px] font-bold tracking-wider uppercase text-emerald-700">Completed</span>
+        <span class="p-2 rounded-full bg-emerald-50 text-emerald-700">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </div>
+      <div class="mt-2 flex items-baseline gap-2">
+        <span class="text-3xl font-bold tracking-tight text-emerald-700" id="metric-completed">0</span>
+        <span class="text-xs text-emerald-700/70 font-mono">successful</span>
+      </div>
+      <div class="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+        <div id="metric-completed-bar" class="h-full bg-emerald-600 rounded-full" style="width: 0%"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Todo Creation Card -->
+  <section class="card-surface rounded-3xl p-6 sm:p-7 border border-slate-200">
+    <h2 class="text-base font-bold tracking-tight text-slate-900 mb-4 flex items-center gap-2">
+      <span>Add New Task</span>
+      <span class="text-xs text-slate-500 font-normal">· Instant MongoDB & Redis write</span>
+    </h2>
+
+    <form id="create-task-form" class="space-y-4">
+      <div>
+        <label for="task-title-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Task Title</label>
+        <input type="text" id="task-title-input" placeholder="e.g. Verify Kubernetes ingress and rolling update..." required class="subtle-input w-full px-4 py-3 rounded-2xl text-sm" />
+      </div>
+
+      <div>
+        <label for="task-details-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Technical Details (Optional)</label>
+        <textarea id="task-details-input" rows="2" placeholder="e.g. Scale replica pods to 3 and check Prometheus memory consumption." class="subtle-input w-full px-4 py-2.5 rounded-2xl text-sm resize-none"></textarea>
+      </div>
+
+      <!-- Scope Pills & Submit Action Row -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-1">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-xs text-slate-600 font-medium mr-1">Scope:</span>
+          <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-slate-900 text-white border border-transparent font-medium shadow-sm transition" data-tag="DevOps">DevOps</button>
+          <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition font-medium" data-tag="Docker">Docker</button>
+          <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition font-medium" data-tag="K8s">K8s</button>
+          <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition font-medium" data-tag="Database">Database</button>
+        </div>
+
+        <button type="submit" id="submit-btn" class="w-full sm:w-auto px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition shadow-sm flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span id="submit-btn-text">Add Task</span>
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Todo List Section -->
+  <section class="card-surface rounded-3xl p-6 sm:p-7 border border-slate-200 space-y-5">
+    <!-- Controls & Filter Toolbar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
+      <div class="flex items-center gap-2">
+        <h3 class="text-base font-bold tracking-tight text-slate-900">Active Task Queue</h3>
+        <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium" id="task-badge-count">0 items</span>
+      </div>
+
+      <!-- Filter Buttons -->
+      <div class="flex items-center p-1 bg-slate-100 rounded-full text-xs font-medium text-slate-600">
+        <button onclick="filterTasks('all')" id="filter-all" class="filter-tab px-4 py-1.5 rounded-full text-white bg-blue-600 shadow-sm transition">All</button>
+        <button onclick="filterTasks('active')" id="filter-active" class="filter-tab px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 transition">Active</button>
+        <button onclick="filterTasks('completed')" id="filter-completed" class="filter-tab px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 transition">Completed</button>
+      </div>
+    </div>
+
+    <!-- Dynamic Tasks Container -->
+    <div id="todo-list" class="space-y-3">
+      <!-- Tasks rendered here -->
+    </div>
+  </section>
 
 </main>
-<!-- END: MainContainer -->
 
-<!-- BEGIN: InteractiveScripts -->
+<!-- Interactive Scripts -->
 <script>
-  const API_BASE = ''; // Proxy handles /todos, /auth, /health
+  const API_BASE = '';
   let allTodos = [];
   let currentFilter = 'all';
   let selectedScope = 'DevOps';
-  let currentUser = null;
-  let isSignupMode = false;
-
-  // Check saved session in LocalStorage
-  function getAccessToken() {
-    return localStorage.getItem('todo_access_token');
-  }
-
-  function setSession(user, token) {
-    currentUser = user;
-    localStorage.setItem('todo_access_token', token);
-    localStorage.setItem('todo_user', JSON.stringify(user));
-    updateUserUI();
-  }
-
-  function clearSession() {
-    currentUser = null;
-    localStorage.removeItem('todo_access_token');
-    localStorage.removeItem('todo_user');
-    updateUserUI();
-  }
-
-  function updateUserUI() {
-    const userBadge = document.getElementById('user-badge');
-    const userNameDisplay = document.getElementById('user-name-display');
-    const authPortalBtn = document.getElementById('auth-portal-btn');
-    const logoutBtn = document.getElementById('logout-btn');
-    const authModal = document.getElementById('auth-modal');
-    const closeBtn = document.getElementById('auth-modal-close-btn');
-
-    if (currentUser) {
-      userNameDisplay.textContent = currentUser.name || currentUser.email;
-      if (authPortalBtn) authPortalBtn.classList.add('hidden');
-      if (logoutBtn) logoutBtn.classList.remove('hidden');
-      userBadge.classList.remove('hidden');
-      authModal.classList.add('hidden');
-      closeBtn.classList.remove('hidden');
-    } else {
-      userNameDisplay.textContent = 'Guest';
-      if (authPortalBtn) authPortalBtn.classList.remove('hidden');
-      if (logoutBtn) logoutBtn.classList.add('hidden');
-      authModal.classList.remove('hidden');
-      closeBtn.classList.add('hidden'); // Force login
-    }
-  }
 
   // Toast notification
   function showToast(message, isError = false) {
     const container = document.getElementById('toast-container');
     const toast = document.createElement('div');
-    toast.className = `px-4 py-2.5 rounded-full text-xs font-semibold shadow-lg transition-all transform translate-y-2 opacity-0 pointer-events-auto flex items-center gap-2 ${isError ? 'bg-error text-on-error' : 'bg-inverse-surface text-inverse-on-surface'}`;
+    toast.className = `px-4 py-2.5 rounded-full text-xs font-semibold shadow-lg transition-all transform translate-y-2 opacity-0 pointer-events-auto flex items-center gap-2 ${isError ? 'bg-red-600 text-white' : 'bg-slate-900 text-white'}`;
     toast.innerHTML = `<span>${message}</span>`;
     container.appendChild(toast);
     setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
     setTimeout(() => {
       toast.classList.add('opacity-0', '-translate-y-2');
       setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }
-
-  // Toggle between Login & Signup
-  const authSwitchBtn = document.getElementById('auth-switch-btn');
-  const authSwitchPrompt = document.getElementById('auth-switch-prompt');
-  const authTitle = document.getElementById('auth-modal-title');
-  const authSubtitle = document.getElementById('auth-modal-subtitle');
-  const authNameGroup = document.getElementById('auth-name-group');
-  const authSubmitText = document.getElementById('auth-submit-text');
-  const authErrorBox = document.getElementById('auth-error-box');
-  const authErrorText = document.getElementById('auth-error-text');
-
-  authSwitchBtn.addEventListener('click', () => {
-    isSignupMode = !isSignupMode;
-    authErrorBox.classList.add('hidden');
-
-    if (isSignupMode) {
-      authTitle.textContent = "Create New Account";
-      authSubtitle.textContent = "Get your own isolated MongoDB database partition";
-      authNameGroup.classList.remove('hidden');
-      authSubmitText.textContent = "Sign Up";
-      authSwitchPrompt.textContent = "Already have an account?";
-      authSwitchBtn.textContent = "Sign In";
-    } else {
-      authTitle.textContent = "Sign In to Your Workspace";
-      authSubtitle.textContent = "Access your private multi-container todo pool";
-      authNameGroup.classList.add('hidden');
-      authSubmitText.textContent = "Sign In";
-      authSwitchPrompt.textContent = "Don't have an account?";
-      authSwitchBtn.textContent = "Sign Up";
-    }
-  });
-
-  // Handle Auth Form Submission
-  document.getElementById('auth-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    authErrorBox.classList.add('hidden');
-
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-password').value;
-    const name = document.getElementById('auth-name').value.trim();
-
-    const endpoint = isSignupMode ? '/auth/register' : '/auth/login';
-    const payload = isSignupMode ? { name, email, password } : { email, password };
-
-    try {
-      const res = await fetch(`${API_BASE}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error?.message || 'Authentication failed.');
-      }
-
-      setSession(data.data.user, data.data.accessToken);
-      showToast(isSignupMode ? 'Account registered successfully!' : 'Signed in successfully!');
-      loadTodos();
-    } catch (err) {
-      authErrorText.textContent = err.message;
-      authErrorBox.classList.remove('hidden');
-    }
-  });
-
-  // Logout
-  document.getElementById('logout-btn').addEventListener('click', () => {
-    clearSession();
-    allTodos = [];
-    renderTasks();
-    showToast('Signed out');
-  });
-
-  // Fetch with Authorization header
-  async function authFetch(url, options = {}) {
-    const token = getAccessToken();
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const res = await fetch(url, { ...options, headers });
-    if (res.status === 401) {
-      clearSession();
-      throw new Error('Session expired. Please sign in again.');
-    }
-    return res;
+    }, 2800);
   }
 
   // Poll Health
   async function checkHealth() {
+    const badge = document.getElementById('cluster-status-badge');
+    const ping = document.getElementById('cluster-status-ping');
+    const dot = document.getElementById('cluster-status-dot');
+    const statusText = document.getElementById('cluster-status-text');
+    const nodeText = document.getElementById('cluster-node-text');
+
     try {
       const res = await fetch(`${API_BASE}/health`);
       const data = await res.json();
-      const statusText = document.getElementById('cluster-status-text');
       if (res.ok && data.status === 'UP') {
-        statusText.innerHTML = `Cluster Online <span class="text-emerald-700 font-normal">(connected)</span>`;
+        if (badge) badge.className = 'px-4 py-2 rounded-full flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-semibold shadow-sm transition-colors duration-300';
+        if (ping) ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75';
+        if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-600';
+        if (statusText) statusText.innerHTML = `Cluster Online <span class="text-emerald-700 font-normal">(connected)</span>`;
+        if (nodeText) {
+          const dbLat = data.services?.database?.latency || '1ms';
+          const redLat = data.services?.redis?.latency || '0ms';
+          nodeText.textContent = `MongoDB: ${dbLat} • Redis: ${redLat}`;
+          nodeText.className = 'font-mono text-[11px] text-emerald-700';
+        }
       } else {
-        statusText.innerHTML = `Cluster Running <span class="text-amber-700 font-normal">(standby)</span>`;
+        if (badge) badge.className = 'px-4 py-2 rounded-full flex items-center gap-2.5 border border-amber-300 bg-amber-50 text-amber-800 text-xs font-semibold shadow-sm transition-colors duration-300';
+        if (ping) ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75';
+        if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-amber-600';
+        if (statusText) statusText.innerHTML = `Reconnecting <span class="text-amber-700 font-normal">(standby)</span>`;
+        if (nodeText) {
+          nodeText.textContent = 'Initializing cluster services';
+          nodeText.className = 'font-mono text-[11px] text-amber-700';
+        }
       }
     } catch (err) {
-      document.getElementById('cluster-status-text').textContent = 'Connecting...';
+      if (badge) badge.className = 'px-4 py-2 rounded-full flex items-center gap-2.5 border border-rose-300 bg-rose-50 text-rose-800 text-xs font-semibold shadow-sm transition-colors duration-300';
+      if (ping) ping.className = 'hidden';
+      if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-rose-600';
+      if (statusText) statusText.innerHTML = `Offline <span class="text-rose-700 font-normal">(disconnected)</span>`;
+      if (nodeText) {
+        nodeText.textContent = 'API service unreachable';
+        nodeText.className = 'font-mono text-[11px] text-rose-700';
+      }
     }
   }
 
-  // Load Todos for logged-in user
+  // Load Todos
   async function loadTodos() {
-    if (!currentUser) return;
     try {
-      const res = await authFetch(`${API_BASE}/todos`);
+      const res = await fetch(`${API_BASE}/todos`);
       const result = await res.json();
       if (res.ok && result.success) {
         allTodos = result.data || [];
@@ -539,33 +336,37 @@
     const listEl = document.getElementById('todo-list');
     const badgeEl = document.getElementById('task-badge-count');
 
-    const total = allTodos.length;
-    const completed = allTodos.filter(t => t.isCompleted).length;
-    const pending = total - completed;
+    let filtered = allTodos;
+    if (currentFilter === 'active') {
+      filtered = allTodos.filter(t => !t.isCompleted);
+    } else if (currentFilter === 'completed') {
+      filtered = allTodos.filter(t => t.isCompleted);
+    }
 
-    document.getElementById('metric-total').textContent = total;
-    document.getElementById('metric-completed').textContent = completed;
-    document.getElementById('metric-pending').textContent = pending;
+    // Update Counts
+    const totalCount = allTodos.length;
+    const completedCount = allTodos.filter(t => t.isCompleted).length;
+    const pendingCount = totalCount - completedCount;
 
-    const pendingPercent = total > 0 ? (pending / total) * 100 : 0;
-    const completedPercent = total > 0 ? (completed / total) * 100 : 0;
-    document.getElementById('metric-pending-bar').style.width = `${pendingPercent}%`;
-    document.getElementById('metric-completed-bar').style.width = `${completedPercent}%`;
+    document.getElementById('metric-total').textContent = totalCount;
+    document.getElementById('metric-pending').textContent = pendingCount;
+    document.getElementById('metric-completed').textContent = completedCount;
 
-    const filtered = allTodos.filter(t => {
-      if (currentFilter === 'active') return !t.isCompleted;
-      if (currentFilter === 'completed') return t.isCompleted;
-      return true;
-    });
+    const compPercent = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
+    const pendPercent = totalCount ? Math.round((pendingCount / totalCount) * 100) : 0;
 
+    document.getElementById('metric-completed-bar').style.width = `${compPercent}%`;
+    document.getElementById('metric-pending-bar').style.width = `${pendPercent}%`;
     badgeEl.textContent = `${filtered.length} item${filtered.length === 1 ? '' : 's'}`;
 
     if (filtered.length === 0) {
       listEl.innerHTML = `
-        <div class="py-12 text-center text-on-surface-variant/70">
-          <svg class="w-10 h-10 mx-auto text-outline-variant mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          <p class="text-sm font-medium">No tasks found in your workspace.</p>
-          <p class="text-xs text-on-surface-variant/50 mt-1">Add a task above to save it to your MongoDB account!</p>
+        <div class="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-slate-200">
+          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
+          </div>
+          <p class="text-sm font-semibold text-slate-700">No tasks in this view</p>
+          <p class="text-xs text-slate-500 mt-1">Add a new task above or switch your active filters.</p>
         </div>
       `;
       return;
@@ -573,82 +374,117 @@
 
     listEl.innerHTML = filtered.map(todo => {
       const isDone = todo.isCompleted;
-      const tagMatch = todo.description ? todo.description.match(/^\[(.*?)\]/) : null;
-      const tag = tagMatch ? tagMatch[1] : (todo.priority || 'DevOps');
-      const cleanDesc = todo.description ? todo.description.replace(/^\[.*?\]\s*/, '') : '';
+      const desc = escapeHtml(todo.description || '');
+      const title = escapeHtml(todo.title);
+
+      // Extract Scope Tag if present
+      let scopeTag = 'Task';
+      let cleanDesc = desc;
+      const match = desc.match(/^\[(.*?)\]\s*(.*)$/);
+      if (match) {
+        scopeTag = match[1];
+        cleanDesc = match[2];
+      }
 
       return `
-        <div class="card-surface p-4 rounded-2xl flex items-start justify-between gap-3 transition-all hover:border-primary/40 group ${isDone ? 'opacity-70 bg-surface-container-low/50' : ''}">
+        <div class="group flex items-start justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition-all hover:shadow-sm" data-id="${todo._id}">
           <div class="flex items-start gap-3.5 flex-1 min-w-0">
-            <button onclick="toggleTask('${todo._id}', ${!isDone})" class="mt-0.5 shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition ${isDone ? 'bg-primary border-primary text-on-primary' : 'border-outline hover:border-primary bg-surface'}">
-              ${isDone ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>' : ''}
+            <!-- Checkbox -->
+            <button onclick="toggleTask('${todo._id}', ${!isDone})" class="mt-0.5 shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isDone ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 hover:border-blue-600 bg-white'}">
+              ${isDone ? '<svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
             </button>
+
+            <!-- Text Content -->
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-sm font-semibold text-on-surface truncate ${isDone ? 'line-through text-on-surface-variant' : ''}">
-                  ${escapeHTML(todo.title)}
-                </span>
-                <span class="px-2 py-0.5 text-[10px] font-mono rounded-full bg-surface-container-high text-on-surface-variant border border-outline-variant font-medium">
-                  ${escapeHTML(tag)}
-                </span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full font-mono ${getTagStyle(scopeTag)}">${scopeTag}</span>
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${getPriorityStyle(todo.priority)}">${todo.priority || 'medium'}</span>
+                <h4 class="text-sm font-semibold text-slate-900 truncate ${isDone ? 'line-through text-slate-400' : ''}">${title}</h4>
               </div>
-              ${cleanDesc ? `<p class="text-xs text-on-surface-variant mt-1 line-clamp-2 ${isDone ? 'line-through text-on-surface-variant/60' : ''}">${escapeHTML(cleanDesc)}</p>` : ''}
+              ${cleanDesc ? `<p class="text-xs text-slate-500 mt-1 leading-relaxed ${isDone ? 'line-through text-slate-400' : ''}">${cleanDesc}</p>` : ''}
+              <div class="flex items-center gap-3 mt-2 text-[11px] text-slate-400 font-mono">
+                <span>ID: ${todo._id.slice(-6)}</span>
+                <span>•</span>
+                <span>${new Date(todo.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
             </div>
           </div>
-          <button onclick="deleteTask('${todo._id}')" class="p-1.5 rounded-full text-on-surface-variant hover:text-error hover:bg-error-container/20 transition opacity-0 group-hover:opacity-100">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          </button>
+
+          <!-- Actions -->
+          <div class="shrink-0 flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
+            <button onclick="deleteTask('${todo._id}')" class="p-1.5 rounded-full hover:bg-red-50 text-slate-400 hover:text-red-600 transition" title="Delete Task">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
         </div>
       `;
     }).join('');
   }
 
-  // Toggle Task Completion
+  function getTagStyle(tag) {
+    switch (tag) {
+      case 'DevOps': return 'bg-purple-50 text-purple-700 border border-purple-200';
+      case 'Docker': return 'bg-blue-50 text-blue-700 border border-blue-200';
+      case 'K8s': return 'bg-sky-50 text-sky-700 border border-sky-200';
+      case 'Database': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
+      default: return 'bg-slate-100 text-slate-700 border border-slate-200';
+    }
+  }
+
+  function getPriorityStyle(p) {
+    switch (p) {
+      case 'high': return 'bg-rose-50 text-rose-700 border border-rose-200';
+      case 'low': return 'bg-slate-100 text-slate-600 border border-slate-200';
+      default: return 'bg-amber-50 text-amber-700 border border-amber-200';
+    }
+  }
+
+  // Toggle Task Status
   async function toggleTask(id, isCompleted) {
     try {
-      const res = await authFetch(`${API_BASE}/todos/${id}`, {
+      const res = await fetch(`${API_BASE}/todos/${id}`, {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ isCompleted }),
       });
       const result = await res.json();
       if (res.ok && result.success) {
-        const item = allTodos.find(t => t._id === id);
-        if (item) item.isCompleted = isCompleted;
-        renderTasks();
-        showToast(isCompleted ? 'Task marked complete' : 'Task marked active');
+        const idx = allTodos.findIndex(t => t._id === id);
+        if (idx !== -1) {
+          allTodos[idx].isCompleted = isCompleted;
+          renderTasks();
+          showToast(isCompleted ? 'Task marked complete!' : 'Task reopened');
+        }
       }
     } catch (err) {
-      showToast(err.message, true);
+      showToast('Failed to update task', true);
     }
   }
 
   // Delete Task
   async function deleteTask(id) {
     try {
-      const res = await authFetch(`${API_BASE}/todos/${id}`, {
-        method: 'DELETE',
-      });
+      const res = await fetch(`${API_BASE}/todos/${id}`, { method: 'DELETE' });
       const result = await res.json();
       if (res.ok && result.success) {
         allTodos = allTodos.filter(t => t._id !== id);
         renderTasks();
-        showToast('Task deleted');
+        showToast('Task removed');
       }
     } catch (err) {
-      showToast(err.message, true);
+      showToast('Failed to delete task', true);
     }
   }
 
-  // Filter Tasks
+  // Filter Handling
   function filterTasks(type) {
     currentFilter = type;
-    const tabs = ['all', 'active', 'completed'];
-    tabs.forEach(tab => {
-      const el = document.getElementById(`filter-${tab}`);
-      if (tab === type) {
-        el.className = "filter-tab px-4 py-1.5 rounded-full text-on-secondary bg-primary shadow-sm transition";
+    ['all', 'active', 'completed'].forEach(t => {
+      const el = document.getElementById(`filter-${t}`);
+      if (t === type) {
+        el.className = "filter-tab px-4 py-1.5 rounded-full text-white bg-blue-600 shadow-sm transition";
       } else {
-        el.className = "filter-tab px-4 py-1.5 rounded-full text-on-surface-variant hover:text-on-surface transition";
+        el.className = "filter-tab px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 transition";
       }
     });
     renderTasks();
@@ -658,9 +494,9 @@
   document.querySelectorAll('.scope-pill').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.scope-pill').forEach(b => {
-        b.className = "scope-pill px-3 py-1 text-xs rounded-full bg-surface-container-low text-on-surface-variant border border-outline-variant hover:bg-surface-container hover:text-on-surface transition font-medium";
+        b.className = "scope-pill px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition font-medium";
       });
-      btn.className = "scope-pill px-3 py-1 text-xs rounded-full bg-inverse-surface text-inverse-on-surface border border-transparent font-medium shadow-sm transition";
+      btn.className = "scope-pill px-3 py-1 text-xs rounded-full bg-slate-900 text-white border border-transparent font-medium shadow-sm transition";
       selectedScope = btn.getAttribute('data-tag');
     });
   });
@@ -668,10 +504,6 @@
   // Create Task
   document.getElementById('create-task-form').addEventListener('submit', async function(e) {
     e.preventDefault();
-    if (!currentUser) {
-      showToast('Please sign in first', true);
-      return;
-    }
 
     const titleInput = document.getElementById('task-title-input');
     const detailsInput = document.getElementById('task-details-input');
@@ -688,8 +520,9 @@
     const payloadDesc = details ? `[${selectedScope}] ${details}` : `[${selectedScope}]`;
 
     try {
-      const res = await authFetch(`${API_BASE}/todos`, {
+      const res = await fetch(`${API_BASE}/todos`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title,
           description: payloadDesc,
@@ -703,7 +536,7 @@
         titleInput.value = '';
         detailsInput.value = '';
         renderTasks();
-        showToast('Task saved to your account!');
+        showToast('Task created successfully!');
       } else {
         throw new Error(result.error?.message || 'Could not add task');
       }
@@ -715,35 +548,15 @@
     }
   });
 
-  // Basic HTML escape helper
-  function escapeHTML(str) {
-    return String(str).replace(/[&<>'"]/g, 
-      tag => ({
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        "'": '&#39;',
-        '"': '&quot;'
-      }[tag] || tag)
-    );
+  function escapeHtml(str) {
+    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+    return str.replace(/[&<>"']/g, m => map[m]);
   }
 
-  // Init
-  const savedUser = localStorage.getItem('todo_user');
-  if (savedUser && getAccessToken()) {
-    try {
-      currentUser = JSON.parse(savedUser);
-    } catch (e) {
-      clearSession();
-    }
-  }
-  updateUserUI();
+  // Initialize
   checkHealth();
-  if (currentUser) {
-    loadTodos();
-  }
+  loadTodos();
   setInterval(checkHealth, 8000);
 </script>
-<!-- END: InteractiveScripts -->
 </body>
 </html>
