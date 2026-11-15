@@ -34,7 +34,15 @@ const generateTokens = (user) => {
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { password, role } = req.body;
+    let name = req.body.name || req.body.username;
+    let email = req.body.email || req.body.username;
+    if (email && !email.includes('@')) {
+      email = `${email}@cluster.local`;
+    }
+    if (!name && email) {
+      name = email.split('@')[0];
+    }
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -73,9 +81,13 @@ const register = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
+      token: accessToken,
+      accessToken,
+      user,
       data: {
         user,
         accessToken,
+        token: accessToken,
         refreshToken,
       },
     });
@@ -90,7 +102,11 @@ const register = async (req, res, next) => {
  */
 const login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    let email = req.body.email || req.body.username;
+    const { password } = req.body;
+    if (email && !email.includes('@')) {
+      email = `${email}@cluster.local`;
+    }
 
     if (!email || !password) {
       return res.status(400).json({
@@ -134,9 +150,13 @@ const login = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: 'Login successful',
+      token: accessToken,
+      accessToken,
+      user,
       data: {
         user,
         accessToken,
+        token: accessToken,
         refreshToken,
       },
     });

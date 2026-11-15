@@ -23,6 +23,9 @@ router.get('/:id', authenticate, validateObjectId, todoController.getTodoById);
 // PUT /todos/:id - Update todo by ID
 router.put('/:id', authenticate, validateObjectId, validateUpdateTodo, todoController.updateTodo);
 
+// PATCH /todos/:id - Partially update todo by ID
+router.patch('/:id', authenticate, validateObjectId, validateUpdateTodo, todoController.updateTodo);
+
 // DELETE /todos/:id - Delete todo by ID
 router.delete('/:id', authenticate, validateObjectId, todoController.deleteTodo);
 

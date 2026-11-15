@@ -61,17 +61,22 @@ const validateCreateTodo = (req, res, next) => {
 };
 
 /**
- * Middleware to validate PUT /todos/:id request body.
+ * Middleware to validate PUT / PATCH /todos/:id request body.
  */
 const validateUpdateTodo = (req, res, next) => {
-  const { title, description, isCompleted } = req.body;
+  // Support both isCompleted and completed from frontends
+  if (req.body.isCompleted === undefined && req.body.completed !== undefined) {
+    req.body.isCompleted = req.body.completed;
+  }
 
-  if (title === undefined && description === undefined && isCompleted === undefined) {
+  const { title, description, isCompleted, priority, scope } = req.body;
+
+  if (title === undefined && description === undefined && isCompleted === undefined && priority === undefined && scope === undefined) {
     return res.status(400).json({
       success: false,
       error: {
         code: 'VALIDATION_ERROR',
-        message: "At least one field ('title', 'description', 'isCompleted') must be provided for update.",
+        message: "At least one valid field ('title', 'description', 'isCompleted', 'completed', 'priority', 'scope') must be provided for update.",
         timestamp: new Date().toISOString(),
       },
     });

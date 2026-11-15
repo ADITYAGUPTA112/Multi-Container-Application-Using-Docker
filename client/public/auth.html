@@ -1,789 +1,316 @@
-<!DOCTYPE html>
-<html lang="en" style="--mouse-x: 50%; --mouse-y: 50%;">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Authentication Portal | Multi-Container Enterprise Platform</title>
-  <link href="https://fonts.googleapis.com" rel="preconnect"/>
-  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KubeOps Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Domine:wght@400&family=EB+Garamond:ital,wght@0,600;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+  /* Layout: split screen. Left is an editorial brand panel with a request trace, right is the form card. Stacks on phones. */
+  :root {
+    --bg: #131313; --s-lowest: #0e0e0e; --s: #1f201f; --s-high: #2a2a29; --s-highest: #353534;
+    --on: #e4e2e0; --on-var: #c4c7c9; --outline: #8e9193; --outline-var: #444749;
+    --primary: #c6c6c7; --on-primary: #2f3132;
+    --err: #ffb4ab; --err-c: #93000a; --on-err-c: #ffdad6;
+    --ok: #6ee7b7; --warn: #fbbf24; --info: #93c5fd;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    color-scheme: dark;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { background: var(--bg); height: 100%; }
+  body {
+    margin: 0; min-height: 100%; background: var(--bg); color: var(--on);
+    font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased;
+    padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0;
+  }
+  .atmosphere { position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(900px 520px at 6% -10%, rgba(255,255,255,.06), transparent 70%),
+      linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 48px 48px,
+      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 48px 48px; }
+  .shell { position: relative; z-index: 1; max-width: 1180px; min-height: 100vh; margin-inline: auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; align-items: center; padding-block: 32px; }
+  @media (min-width: 920px) { .shell { grid-template-columns: minmax(0, 1.05fr) minmax(0, 440px); gap: 72px; } }
+  .serif { font-family: 'EB Garamond', Georgia, serif; font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 500; font-size: 12px; line-height: 18px; }
+  .eyebrow { font-weight: 500; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--on-var); }
+  .brand { font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 24px; line-height: 32px; }
+  .brand em { font-style: italic; font-weight: 500; color: var(--on-var); }
+  :focus-visible { outline: 2px solid var(--outline); outline-offset: 2px; }
 
-  <style>
-    @layer base {
-      html, body { margin: 0; padding: 0; }
-      body { overscroll-behavior: none; }
-      main > :first-child { margin-top: 0 !important; }
-      main > :last-child { margin-bottom: 0 !important; }
-    }
-    ::-webkit-scrollbar { display: none; }
+  /* Brand panel */
+  .story { display: flex; flex-direction: column; gap: 28px; min-width: 0; }
+  .story h1 { margin: 0; font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: clamp(34px, 5.2vw, 56px); line-height: 1.06; letter-spacing: -.01em; text-wrap: balance; max-width: 14ch; }
+  .story h1 em { font-style: italic; font-weight: 500; color: var(--on-var); }
+  .story p.lead { margin: 0; max-width: 46ch; font-family: 'Domine', Georgia, serif; font-size: 16px; line-height: 24px; color: var(--on-var); }
+  .trace { background: var(--s-lowest); border: 1px solid rgba(68,71,73,.6); border-radius: 8px; padding: 16px 18px; max-width: 520px; }
+  .trace .row { display: flex; align-items: baseline; gap: 12px; padding: 5px 0; border-bottom: 1px dashed rgba(68,71,73,.45); }
+  .trace .row:last-child { border-bottom: 0; }
+  .trace .t { color: var(--on-var); width: 54px; flex: none; }
+  .trace .m { color: var(--on); min-width: 0; overflow-wrap: anywhere; }
+  .trace .s { margin-left: auto; flex: none; }
+  .trace .ok { color: var(--ok); } .trace .info { color: var(--info); }
+  .facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; max-width: 520px; }
+  .facts div { border-top: 1px solid var(--outline-var); padding-top: 10px; }
+  .facts b { display: block; font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 24px; line-height: 28px; }
+  .facts span { font-size: 12px; color: var(--on-var); }
+  @media (max-width: 919px) { .story .trace, .story .facts { display: none; } .story h1 { max-width: 20ch; font-size: 34px; } .story { gap: 14px; } }
 
-    /* Dynamic Multicolor Aura & Ambient Flow Styles */
-    :root {
-      --mouse-x: 50%;
-      --mouse-y: 50%;
-    }
-
-    @keyframes floatBlob1 {
-      0%, 100% { transform: translate(0px, 0px) scale(1); }
-      33% { transform: translate(60px, -40px) scale(1.15); }
-      66% { transform: translate(-40px, 50px) scale(0.9); }
-    }
-
-    @keyframes floatBlob2 {
-      0%, 100% { transform: translate(0px, 0px) scale(1); }
-      33% { transform: translate(-70px, 50px) scale(1.1); }
-      66% { transform: translate(50px, -30px) scale(0.95); }
-    }
-
-    @keyframes floatBlob3 {
-      0%, 100% { transform: translate(0px, 0px) scale(1); }
-      50% { transform: translate(50px, 60px) scale(1.2); }
-    }
-
-    @keyframes floatBlob4 {
-      0%, 100% { transform: translate(0px, 0px) scale(1); }
-      50% { transform: translate(-60px, -50px) scale(1.15); }
-    }
-
-    .animate-blob-1 { animation: floatBlob1 14s ease-in-out infinite alternate; }
-    .animate-blob-2 { animation: floatBlob2 18s ease-in-out infinite alternate; }
-    .animate-blob-3 { animation: floatBlob3 16s ease-in-out infinite alternate; }
-    .animate-blob-4 { animation: floatBlob4 20s ease-in-out infinite alternate; }
-
-    .interactive-cursor-glow {
-      background: radial-gradient(
-        650px circle at var(--mouse-x) var(--mouse-y),
-        rgba(6, 182, 212, 0.45) 0%,
-        rgba(168, 85, 247, 0.38) 28%,
-        rgba(244, 63, 94, 0.30) 48%,
-        rgba(245, 158, 11, 0.22) 65%,
-        transparent 80%
-      );
-      transition: opacity 0.3s ease;
-    }
-
-    /* Click Shockwave Ring Animation */
-    @keyframes sparkRipple {
-      0% {
-        transform: translate(-50%, -50%) scale(0.2);
-        opacity: 0.95;
-      }
-      100% {
-        transform: translate(-50%, -50%) scale(3.2);
-        opacity: 0;
-      }
-    }
-
-    .spark-shockwave {
-      position: fixed;
-      border-radius: 9999px;
-      pointer-events: none;
-      z-index: 60;
-      width: 90px;
-      height: 90px;
-      border: 2px solid rgba(6, 182, 212, 0.75);
-      box-shadow: 0 0 24px 5px rgba(236, 72, 153, 0.5), inset 0 0 16px rgba(6, 182, 212, 0.4);
-      animation: sparkRipple 0.65s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .animate-blob-1, .animate-blob-2, .animate-blob-3, .animate-blob-4, .spark-shockwave {
-        animation: none !important;
-      }
-    }
-  </style>
-
-  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-  <script id="tailwind-config">
-    tailwind.config = {
-      darkMode: "class",
-      theme: {
-        extend: {
-          "colors": {
-            "surface-bright": "#f9f9fd",
-            "error": "#ba1a1a",
-            "tertiary-container": "#fef9f6",
-            "secondary": "#5f5e5e",
-            "inverse-on-surface": "#f0f0f4",
-            "on-tertiary-container": "#757270",
-            "on-error-container": "#93000a",
-            "outline-variant": "#c4c7c9",
-            "on-primary": "#ffffff",
-            "tertiary-fixed": "#e6e2df",
-            "surface": "#f9f9fd",
-            "error-container": "#ffdad6",
-            "inverse-primary": "#c6c6c7",
-            "on-secondary": "#ffffff",
-            "surface-dim": "#d9dadd",
-            "outline": "#747779",
-            "on-error": "#ffffff",
-            "secondary-fixed": "#e5e2e1",
-            "on-secondary-fixed-variant": "#474646",
-            "inverse-surface": "#2e3033",
-            "on-background": "#1a1c1f",
-            "on-tertiary": "#ffffff",
-            "surface-container-lowest": "#ffffff",
-            "on-primary-fixed": "#1a1c1d",
-            "tertiary-fixed-dim": "#cac6c3",
-            "on-secondary-container": "#656464",
-            "surface-container-highest": "#e2e2e6",
-            "on-primary-fixed-variant": "#454748",
-            "surface-container": "#ededf1",
-            "primary-fixed-dim": "#c6c6c7",
-            "background": "#f9f9fd",
-            "primary-fixed": "#e2e2e3",
-            "on-surface-variant": "#444749",
-            "on-tertiary-fixed": "#1c1b1a",
-            "on-primary-container": "#717374",
-            "primary-container": "#fafafb",
-            "surface-variant": "#e2e2e6",
-            "on-tertiary-fixed-variant": "#484644",
-            "surface-container-high": "#e8e8ec",
-            "surface-tint": "#5d5e60",
-            "primary": "#5d5e60",
-            "secondary-fixed-dim": "#c9c6c5",
-            "tertiary": "#605e5c",
-            "secondary-container": "#e5e2e1",
-            "on-surface": "#1a1c1f",
-            "on-secondary-fixed": "#1c1b1b",
-            "surface-container-low": "#f3f3f7"
-          },
-          "borderRadius": {
-            "DEFAULT": "1rem",
-            "lg": "2rem",
-            "xl": "3rem",
-            "full": "9999px"
-          },
-          "spacing": {
-            "margin": "2rem",
-            "gutter": "1.5rem",
-            "space-sm": "0.5rem",
-            "space-lg": "1.5rem",
-            "space-md": "1rem",
-            "space-xs": "0.25rem",
-            "space-xl": "2.5rem"
-          },
-          "fontFamily": {
-            "body-md": ["Arimo"],
-            "headline-lg": ["Be Vietnam Pro"],
-            "label-sm": ["Inter"]
-          },
-          "fontSize": {
-            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
-            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
-            "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
-          }
-        },
-      },
-    }
-  </script>
+  /* Form card */
+  .panel { background: rgba(53,53,52,.55); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,.10); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.5); padding: 32px; min-width: 0; }
+  @media (max-width: 479px) { .panel { padding: 22px 18px; } }
+  .tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--outline-var); }
+  .tabs button { height: 44px; background: none; border: 0; color: var(--on-var); font: 500 13px 'Inter', sans-serif; cursor: pointer; transition: color .15s ease-out; }
+  .tabs button:hover { color: var(--on); }
+  .tabs button[aria-selected="true"] { color: var(--on); }
+  .tabs .ink { position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px; background: var(--primary); transition: transform .2s var(--ease); }
+  .panel h2 { margin: 24px 0 4px; font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 28px; line-height: 34px; }
+  .panel .sub { margin: 0; color: var(--on-var); font-size: 13px; }
+  form { display: flex; flex-direction: column; gap: 16px; margin-top: 22px; }
+  label.l { display: block; padding-bottom: 6px; font-weight: 500; font-size: 12px; color: var(--on-var); }
+  .field { position: relative; }
+  .input { width: 100%; height: 48px; padding: 0 14px; background: var(--s-lowest); color: var(--on); border: 1px solid var(--outline-var); border-radius: 4px; font: 400 14px 'Inter', sans-serif; transition: border-color .15s ease-out; }
+  .input::placeholder { color: rgba(196,199,201,.55); }
+  .input:hover { border-color: var(--outline); }
+  .input:focus { border-color: var(--outline); outline: 2px solid var(--outline); outline-offset: 2px; }
+  .input[aria-invalid="true"] { border-color: var(--err); }
+  .input.pw { padding-right: 50px; }
+  .eye { position: absolute; right: 6px; top: 6px; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 4px; border: 0; background: transparent; color: var(--on-var); cursor: pointer; }
+  .eye:hover { background: var(--s-high); color: var(--on); }
+  svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .err { margin: 6px 0 0; font-size: 12px; color: var(--err); }
+  .meter { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
+  .meter i { height: 4px; border-radius: 2px; background: var(--s-high); transition: background .2s ease-out; }
+  .meter[data-s="1"] i:nth-child(-n+1) { background: var(--err); }
+  .meter[data-s="2"] i:nth-child(-n+2) { background: var(--warn); }
+  .meter[data-s="3"] i:nth-child(-n+3) { background: var(--ok); }
+  .meter[data-s="4"] i:nth-child(-n+4) { background: var(--ok); }
+  .hint { margin-top: 6px; font-size: 12px; color: var(--on-var); }
+  .banner { padding: 10px 12px; border-radius: 4px; font-size: 12px; background: var(--err-c); color: var(--on-err-c); }
+  .banner.info { background: rgba(147,197,253,.12); color: var(--info); border: 1px solid rgba(147,197,253,.3); }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 48px; padding: 0 20px; border-radius: 4px; border: 1px solid var(--primary); background: var(--primary); color: var(--on-primary); font: 600 14px 'Inter', sans-serif; cursor: pointer; text-decoration: none; transition: background .15s ease-out, opacity .15s; }
+  .btn:hover { background: #dcdcdd; }
+  .btn:disabled { opacity: .65; cursor: progress; }
+  .btn.ghost { background: transparent; color: var(--on); border-color: var(--outline-var); }
+  .btn.ghost:hover { background: var(--s-high); border-color: var(--outline); }
+  .spin { width: 16px; height: 16px; border-radius: 9999px; border: 2px solid rgba(47,49,50,.3); border-top-color: var(--on-primary); animation: rot .7s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+  .switch { margin: 18px 0 0; text-align: center; font-size: 13px; color: var(--on-var); }
+  .switch button { background: none; border: 0; padding: 0; color: var(--on); font: 500 13px 'Inter', sans-serif; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .done { text-align: center; padding: 28px 0 8px; animation: pop .25s ease-out both; }
+  .done .ring { width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 9999px; display: grid; place-items: center; background: rgba(110,231,183,.12); border: 1px solid rgba(110,231,183,.4); color: var(--ok); }
+  .done .ring svg { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  @keyframes pop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+  .foot { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--on-var); font-size: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 9999px; background: var(--outline); }
+  .dot.ok { background: var(--ok); } .dot.down { background: var(--err); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
 </head>
+<body>
+<div class="atmosphere" aria-hidden="true"></div>
+<div class="shell">
+  <section class="story" aria-label="About KubeOps Todo Engine">
+    <div class="brand">KubeOps <em>Todo Engine</em></div>
+    <h1>Your tasks, kept in a <em>tenant of their own.</em></h1>
+    <p class="lead">Every account gets an isolated MongoDB collection, a Redis-cached read path and a signed session. Sign in to see the cluster working for you.</p>
+    <div class="trace" aria-hidden="true">
+      <div class="eyebrow" style="padding-bottom: 6px;">Request trace</div>
+      <div class="row mono"><span class="t">0 ms</span><span class="m">POST /auth/login</span><span class="s info">api</span></div>
+      <div class="row mono"><span class="t">3 ms</span><span class="m">verify credentials, tenant lookup</span><span class="s ok">mongo</span></div>
+      <div class="row mono"><span class="t">4 ms</span><span class="m">issue JWT, warm session cache</span><span class="s ok">redis</span></div>
+      <div class="row mono"><span class="t">5 ms</span><span class="m">200 OK, redirect to dashboard</span><span class="s ok">200</span></div>
+    </div>
+    <div class="facts" aria-hidden="true">
+      <div><b>2 to 10</b><span>autoscaled pods</span></div>
+      <div><b>1 ms</b><span>cached reads</span></div>
+      <div><b>1 : 1</b><span>user to collection</span></div>
+    </div>
+  </section>
 
-<body class="bg-surface font-body-md text-on-surface overflow-x-hidden selection:bg-cyan-500/20">
-  <main class="min-h-screen w-full flex items-center justify-center p-margin relative overflow-hidden">
-    <div class="flex flex-col w-full items-center justify-center relative py-space-xl z-10">
-
-      <!-- BRIGHT MULTICOLOR INTERACTIVE BACKGROUND SYSTEM -->
-      <div aria-hidden="true" class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <!-- Base Radiant Underlay -->
-        <div class="absolute inset-0 bg-gradient-to-tr from-cyan-100/60 via-amber-50/70 to-fuchsia-100/60"></div>
-        <!-- Ambient Bright Floating Multicolor Orbs -->
-        <div class="absolute -top-24 -left-20 w-[550px] h-[550px] bg-gradient-to-br from-cyan-400/50 via-teal-300/40 to-blue-500/45 rounded-full blur-[100px] animate-blob-1 mix-blend-multiply"></div>
-        <div class="absolute top-1/4 -right-28 w-[600px] h-[600px] bg-gradient-to-bl from-fuchsia-500/50 via-pink-400/45 to-purple-600/40 rounded-full blur-[115px] animate-blob-2 mix-blend-multiply"></div>
-        <div class="absolute -bottom-24 left-1/4 w-[580px] h-[580px] bg-gradient-to-tr from-amber-400/50 via-orange-400/45 to-yellow-300/45 rounded-full blur-[110px] animate-blob-3 mix-blend-multiply"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-gradient-to-r from-emerald-400/40 via-lime-300/35 to-teal-400/40 rounded-full blur-[125px] animate-blob-4 mix-blend-multiply"></div>
-        <!-- Interactive Dynamic Mouse Tracking Multi-color Spotlight -->
-        <div class="absolute inset-0 interactive-cursor-glow pointer-events-none mix-blend-multiply"></div>
-        <div class="absolute inset-0 interactive-cursor-glow pointer-events-none opacity-60 filter blur-xl"></div>
-      </div>
-
-      <!-- Subtle Ambient Background Cluster Mesh -->
-      <div class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden opacity-30 z-0">
-        <svg class="w-full max-w-5xl h-auto text-outline-variant" fill="none" viewbox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern height="40" id="grid-pattern" patternunits="userSpaceOnUse" width="40">
-              <circle cx="2" cy="2" fill="currentColor" fill-opacity="0.35" r="1.5"></circle>
-              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-opacity="0.25" stroke-width="0.5"></path>
-            </pattern>
-          </defs>
-          <rect fill="url(#grid-pattern)" height="100%" width="100%"></rect>
-          <!-- Abstract Cluster Nodes -->
-          <g stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.5" stroke-width="1.2">
-            <line x1="200" x2="400" y1="180" y2="120"></line>
-            <line x1="400" x2="620" y1="120" y2="200"></line>
-            <line x1="400" x2="400" y1="120" y2="340"></line>
-            <line x1="200" x2="260" y1="180" y2="400"></line>
-            <line x1="620" x2="540" y1="200" y2="410"></line>
-          </g>
-          <circle class="text-primary" cx="200" cy="180" fill="currentColor" r="6"></circle>
-          <circle class="text-primary" cx="400" cy="120" fill="currentColor" r="8"></circle>
-          <circle class="text-primary" cx="620" cy="200" fill="currentColor" r="6"></circle>
-          <circle class="text-secondary" cx="400" cy="340" fill="currentColor" r="5"></circle>
-          <circle class="text-outline" cx="260" cy="400" fill="currentColor" r="4"></circle>
-          <circle class="text-outline" cx="540" cy="410" fill="currentColor" r="4"></circle>
-        </svg>
-      </div>
-
-      <!-- Navigation Top Bar -->
-      <div class="relative z-10 w-full max-w-md flex items-center justify-between mb-3 px-2">
-        <a href="/index.html" class="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-black/[0.06] transition shadow-sm">
-          <span class="material-symbols-outlined text-[16px]">arrow_back</span>
-          <span>Operations Dashboard</span>
-        </a>
-        <div id="active-session-pill" class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-300 shadow-sm">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span id="active-user-name">Authenticated</span>
-        </div>
-      </div>
-
-      <!-- Central Authentication Card -->
-      <div class="relative z-10 w-full max-w-md bg-surface-container-lowest/95 backdrop-blur-xl shadow-2xl ring-1 ring-black/[0.04] rounded-xl p-8 flex flex-col transition-shadow">
-        
-        <!-- Header Branding -->
-        <div class="flex flex-col items-center text-center">
-          <div class="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center shadow-inner mb-space-sm">
-            <span class="material-symbols-outlined text-on-surface text-2xl" style='font-variation-settings: "FILL" 1;'>view_in_ar</span>
-          </div>
-          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
-            Multi-Container Platform
-          </h1>
-          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">
-            Secure Infrastructure Orchestration &amp; Workload Manager
-          </p>
-        </div>
-
-        <!-- Mode Selector: Segmented Pill Tab Switcher -->
-        <div class="w-full bg-surface-container-high p-1 rounded-full flex items-center mt-space-lg mb-space-md">
-          <button class="flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5" id="tab-signin" onclick="switchAuthMode('signin')" type="button">
-            <span class="material-symbols-outlined text-[16px]">login</span>
-            <span>Sign In</span>
-          </button>
-          <button class="flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5" id="tab-signup" onclick="switchAuthMode('signup')" type="button">
-            <span class="material-symbols-outlined text-[16px]">person_add</span>
-            <span>Register Tenant</span>
-          </button>
-        </div>
-
-        <!-- Alert Notification Box -->
-        <div id="auth-alert" class="hidden mb-4 p-3 rounded-2xl text-xs font-medium flex items-center gap-2 transition-all duration-300">
-          <span id="auth-alert-icon" class="material-symbols-outlined text-[18px]"></span>
-          <span id="auth-alert-text"></span>
-        </div>
-
-        <!-- SIGN IN FORM -->
-        <form class="flex flex-col gap-space-md" id="form-signin" onsubmit="handleSignIn(event)">
-          <div class="flex flex-col gap-1.5">
-            <label class="font-label-sm text-label-sm text-on-surface font-medium flex items-center justify-between" for="signin-email">
-              <span>DevOps Identity</span>
-              <span class="text-on-surface-variant text-[11px]">JWT / SSO Protected</span>
-            </label>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">alternate_email</span>
-              <input class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signin-email" name="email" placeholder="devops.engineer@cluster.internal" required="" type="email" value=""/>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-1.5">
-            <div class="flex items-center justify-between">
-              <label class="font-label-sm text-label-sm text-on-surface font-medium" for="signin-password">Password</label>
-              <span class="font-label-sm text-[11px] text-on-surface-variant">Min. 6 chars</span>
-            </div>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">key</span>
-              <input class="w-full pl-10 pr-11 py-2.5 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors tracking-widest" id="signin-password" name="password" placeholder="••••••••••••" required="" type="password" value=""/>
-              <button aria-label="Toggle Password Visibility" class="absolute right-3.5 text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center p-1 rounded-full focus:outline-none" onclick="togglePasswordVisibility('signin-password', this)" type="button">
-                <span class="material-symbols-outlined text-[18px]">visibility</span>
-              </button>
-            </div>
-          </div>
-
-          <!-- Remember JWT Session -->
-          <div class="flex items-center justify-between pt-1">
-            <label class="flex items-center gap-2.5 cursor-pointer select-none">
-              <input checked="" class="w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" id="remember-token" type="checkbox"/>
-              <span class="font-label-sm text-label-sm text-on-surface-variant">
-                Remember session token (JWT Auth)
-              </span>
-            </label>
-          </div>
-
-          <!-- Primary Submit CTA -->
-          <button class="w-full mt-2 py-3 px-6 rounded-full bg-primary hover:bg-secondary text-on-primary font-label-sm text-body-md font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]" id="btn-signin" type="submit">
-            <span>Sign In</span>
-            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-          </button>
-        </form>
-
-        <!-- SIGN UP FORM (Initially Hidden) -->
-        <form class="flex flex-col gap-space-sm hidden" id="form-signup" onsubmit="handleSignUp(event)">
-          <div class="flex flex-col gap-1">
-            <label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-name">Full Name</label>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">badge</span>
-              <input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-name" placeholder="Aditya Gupta" required="" type="text"/>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-1">
-            <label class="font-label-sm text-label-sm text-on-surface font-medium flex items-center justify-between" for="signup-tenant">
-              <span>Cluster Tenant / Role</span>
-              <span class="text-on-surface-variant text-[11px]">RBAC Isolated</span>
-            </label>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">domain</span>
-              <input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-tenant" placeholder="Platform Engineering" type="text" value="Platform Engineering"/>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-1">
-            <label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-email">Work Email</label>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">mail</span>
-              <input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-email" placeholder="aditya@cluster.internal" required="" type="email"/>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-1">
-            <label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-password">Master Password</label>
-            <div class="relative flex items-center">
-              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">lock</span>
-              <input class="w-full pl-10 pr-11 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors tracking-widest" id="signup-password" placeholder="••••••••••••" required="" type="password"/>
-              <button aria-label="Toggle Password Visibility" class="absolute right-3.5 text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center p-1 rounded-full focus:outline-none" onclick="togglePasswordVisibility('signup-password', this)" type="button">
-                <span class="material-symbols-outlined text-[18px]">visibility</span>
-              </button>
-            </div>
-          </div>
-
-          <button class="w-full mt-3 py-3 px-6 rounded-full bg-primary hover:bg-secondary text-on-primary font-label-sm text-body-md font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]" id="btn-signup" type="submit">
-            <span>Register Tenant</span>
-            <span class="material-symbols-outlined text-[20px]">cloud_queue</span>
-          </button>
-        </form>
-
-        <!-- Micro Cluster Telemetry Status -->
-        <div class="mt-space-lg pt-space-md bg-surface-container-low/80 rounded-2xl p-space-sm flex flex-col gap-2">
-          <div class="flex items-center justify-between text-[11px] text-on-surface-variant font-mono">
-            <span>Mesh Security: TLS / AES-256</span>
-            <span id="gateway-ping">Gateway: Online</span>
-          </div>
-          <div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden flex">
-            <div class="bg-primary h-full w-1/3"></div>
-            <div class="bg-secondary h-full w-1/3"></div>
-            <div class="bg-outline h-full w-1/3"></div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Bottom Architecture Specification Footnote -->
-      <footer class="relative z-10 mt-space-lg flex flex-wrap items-center justify-center gap-2 text-center text-on-surface-variant font-label-sm text-label-sm max-w-lg px-4 backdrop-blur-sm py-1 rounded-full bg-white/30 border border-white/50 shadow-sm">
-        <span class="flex items-center gap-1.5">
-          <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-          Nginx API Gateway
-        </span>
-        <span class="opacity-40">•</span>
-        <span>Redis Partitioned Sessions</span>
-        <span class="opacity-40">•</span>
-        <span>MongoDB Replica Auth</span>
-      </footer>
-
+  <section class="panel" aria-labelledby="formTitle">
+    <div class="tabs" role="tablist" aria-label="Account access">
+      <button role="tab" id="tabIn" aria-selected="true" aria-controls="formWrap">Sign in</button>
+      <button role="tab" id="tabUp" aria-selected="false" aria-controls="formWrap">Create account</button>
+      <span class="ink" id="ink"></span>
     </div>
 
-    <!-- Particle Canvas Overlay for Dynamic Sparks -->
-    <canvas class="fixed inset-0 pointer-events-none z-50 w-full h-full" id="spark-canvas"></canvas>
+    <div id="formWrap" role="tabpanel">
+      <h2 id="formTitle">Welcome back</h2>
+      <p class="sub" id="formSub">Sign in to open your task workspace.</p>
+      <form id="authForm" novalidate>
+        <div id="nameRow" hidden>
+          <label class="l" for="name">Full name</label>
+          <input class="input" id="name" name="name" autocomplete="name" placeholder="Aditya Sharma" aria-describedby="nameErr">
+          <p class="err" id="nameErr" hidden></p>
+        </div>
+        <div>
+          <label class="l" for="id" id="idLabel">Email or username</label>
+          <input class="input" id="id" name="username" autocomplete="username" placeholder="you@example.com" aria-describedby="idErr">
+          <p class="err" id="idErr" hidden></p>
+        </div>
+        <div>
+          <label class="l" for="pw">Password</label>
+          <div class="field">
+            <input class="input pw" id="pw" name="password" type="password" autocomplete="current-password" placeholder="At least 6 characters" aria-describedby="pwErr pwHint">
+            <button type="button" class="eye" id="eye" aria-label="Show password"></button>
+          </div>
+          <div class="meter" id="meter" data-s="0" hidden aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+          <div class="hint" id="pwHint" hidden>Use 6 or more characters with a mix of letters, numbers and symbols.</div>
+          <p class="err" id="pwErr" hidden></p>
+        </div>
+        <div id="confirmRow" hidden>
+          <label class="l" for="pw2">Confirm password</label>
+          <input class="input" id="pw2" name="confirm" type="password" autocomplete="new-password" placeholder="Repeat your password" aria-describedby="pw2Err">
+          <p class="err" id="pw2Err" hidden></p>
+        </div>
+        <div class="banner" id="banner" role="alert" hidden></div>
+        <button class="btn" id="submit" type="submit"><span>Sign in</span></button>
+      </form>
+      <p class="switch" id="switch">New to KubeOps? <button type="button" id="switchBtn">Create an account</button></p>
+    </div>
 
-    <script>
-      // API Base Path
-      const API_AUTH = '/auth';
+    <div class="done" id="done" hidden role="status">
+      <div class="ring"><svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg></div>
+      <h2 style="margin: 0;" id="doneTitle">You are signed in</h2>
+      <p class="sub" id="doneSub" style="margin: 6px 0 22px;">Opening your dashboard.</p>
+      <div class="banner info" id="demoNote" hidden style="margin-bottom: 16px; text-align: left;">The API is not reachable from this page, so nothing was sent. This is a preview of the success state.</div>
+      <a class="btn" id="goBtn" href="/">Open dashboard</a>
+    </div>
 
-      // Smooth Interactive Mouse Movement Tracker
-      let targetX = window.innerWidth / 2;
-      let targetY = window.innerHeight / 2;
-      let currentX = targetX;
-      let currentY = targetY;
-      let animationFrameId = null;
+    <div class="foot"><span class="dot" id="hDot"></span><span class="mono" id="hText">Checking API…</span></div>
+  </section>
+</div>
 
-      window.addEventListener('mousemove', (e) => {
-        targetX = e.clientX;
-        targetY = e.clientY;
-        if (!animationFrameId) {
-          animationFrameId = requestAnimationFrame(updateMouseCoordinates);
-        }
-      });
+<script>
+(() => {
+  /* ---------- Config: edit to match your deployment ---------- */
+  const CONFIG = {
+    apiBase: (window.KUBEOPS_CONFIG && window.KUBEOPS_CONFIG.apiBase) || '', // '' = same origin. Use '/api' if Nginx prefixes it.
+    dashboardUrl: '/',            // where to go after a successful sign in
+    tokenKey: 'kubeops_token', userKey: 'kubeops_user'
+  };
+  const $ = (id) => document.getElementById(id);
+  const store = { set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+  const EYE = '<svg class="i" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF = '<svg class="i" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.2-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+  const ROUTES = { 'sign-in': 'login', 'create-account': 'register' };
+  let mode = 'login';
 
-      // Touch support for mobile / touch devices
-      window.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 0) {
-          targetX = e.touches[0].clientX;
-          targetY = e.touches[0].clientY;
-          if (!animationFrameId) {
-            animationFrameId = requestAnimationFrame(updateMouseCoordinates);
-          }
-        }
-      }, { passive: true });
+  async function api(path, opts = {}) {
+    const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), opts.timeout || 8000);
+    try {
+      const res = await fetch(CONFIG.apiBase + path, { method: opts.method || 'GET', headers: { 'Content-Type': 'application/json' }, body: opts.body ? JSON.stringify(opts.body) : undefined, signal: ctrl.signal });
+      const data = (res.headers.get('content-type') || '').includes('json') ? await res.json().catch(() => null) : null;
+      if (!res.ok) { const e = new Error((data && (data.message || data.error && (data.error.message || data.error))) || ('Request failed (' + res.status + ')')); e.status = res.status; throw e; }
+      return data;
+    } finally { clearTimeout(timer); }
+  }
 
-      function updateMouseCoordinates() {
-        currentX += (targetX - currentX) * 0.12;
-        currentY += (targetY - currentY) * 0.12;
+  /* ---------- Mode switching ---------- */
+  function setMode(next, fromHash) {
+    mode = next; const up = mode === 'register';
+    $('tabIn').setAttribute('aria-selected', String(!up)); $('tabUp').setAttribute('aria-selected', String(up));
+    $('ink').style.transform = up ? 'translateX(100%)' : 'none';
+    $('formTitle').textContent = up ? 'Create your workspace' : 'Welcome back';
+    $('formSub').textContent = up ? 'Free to start. Your tasks stay private to your account.' : 'Sign in to open your task workspace.';
+    $('nameRow').hidden = !up; $('confirmRow').hidden = !up; $('meter').hidden = !up; $('pwHint').hidden = !up;
+    $('pw').autocomplete = up ? 'new-password' : 'current-password';
+    $('submit').firstElementChild.textContent = up ? 'Create account' : 'Sign in';
+    $('switch').firstChild.textContent = up ? 'Already have an account? ' : 'New to KubeOps? ';
+    $('switchBtn').textContent = up ? 'Sign in' : 'Create an account';
+    clearErrors();
+    if (!fromHash) { try { location.hash = up ? 'create-account' : 'sign-in'; } catch {} }
+  }
+  function fromHash() {
+    const h = (location.hash || '').replace('#', '');
+    setMode(ROUTES[h] || 'login', true);
+  }
 
-        document.documentElement.style.setProperty('--mouse-x', `${currentX}px`);
-        document.documentElement.style.setProperty('--mouse-y', `${currentY}px`);
+  /* ---------- Validation ---------- */
+  function clearErrors() {
+    ['name', 'id', 'pw', 'pw2'].forEach((k) => { const e = $(k + 'Err') || $(k === 'id' ? 'idErr' : ''); if (e) { e.hidden = true; e.textContent = ''; } const i = $(k); if (i) i.removeAttribute('aria-invalid'); });
+    $('banner').hidden = true;
+  }
+  function fail(inputId, errId, msg) { const i = $(inputId), e = $(errId); i.setAttribute('aria-invalid', 'true'); e.textContent = msg; e.hidden = false; return i; }
+  function validate() {
+    clearErrors(); let first = null; const up = mode === 'register';
+    const id = $('id').value.trim(), pw = $('pw').value;
+    if (up && $('name').value.trim().length < 2) first = first || fail('name', 'nameErr', 'Enter your full name.');
+    if (!id) first = first || fail('id', 'idErr', up ? 'Enter your email address.' : 'Enter your email or username.');
+    else if (up && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(id)) first = first || fail('id', 'idErr', 'Enter a valid email address, like name@example.com.');
+    if (!pw) first = first || fail('pw', 'pwErr', 'Enter your password.');
+    else if (up && pw.length < 6) first = first || fail('pw', 'pwErr', 'Use at least 6 characters.');
+    if (up && pw && $('pw2').value !== pw) first = first || fail('pw2', 'pw2Err', 'The two passwords do not match.');
+    if (first) first.focus();
+    return !first;
+  }
+  function strength(p) {
+    let s = 0; if (p.length >= 6) s++; if (/[a-z]/.test(p) && /[A-Z]/.test(p)) s++; if (/\d/.test(p)) s++; if (/[^A-Za-z0-9]/.test(p) || p.length >= 14) s++;
+    return p ? Math.max(1, s) : 0;
+  }
 
-        if (Math.abs(targetX - currentX) > 0.5 || Math.abs(targetY - currentY) > 0.5) {
-          animationFrameId = requestAnimationFrame(updateMouseCoordinates);
-        } else {
-          animationFrameId = null;
-        }
+  /* ---------- Submit ---------- */
+  function showDone(name, demo) {
+    $('formWrap').hidden = true; $('done').hidden = false;
+    $('doneTitle').textContent = mode === 'register' ? 'Account created' : 'You are signed in';
+    $('doneSub').textContent = demo ? 'Preview only.' : (name ? 'Welcome, ' + name + '. Opening your dashboard.' : 'Opening your dashboard.');
+    $('demoNote').hidden = !demo; $('goBtn').href = CONFIG.dashboardUrl;
+    if (!demo) setTimeout(() => { location.href = CONFIG.dashboardUrl; }, 900);
+  }
+  async function submit(ev) {
+    ev.preventDefault(); if (!validate()) return;
+    const btn = $('submit'), label = btn.firstElementChild.textContent; btn.disabled = true; btn.innerHTML = '<span class="spin"></span>';
+    const id = $('id').value.trim(), pw = $('pw').value, name = $('name').value.trim(), up = mode === 'register';
+    const body = up ? { name, username: id, email: id, password: pw } : { username: id, email: id.includes('@') ? id : undefined, password: pw };
+    try {
+      const data = await api(up ? '/auth/register' : '/auth/login', { method: 'POST', body });
+      const token = data && (data.token || data.accessToken || data.access_token || (data.data && (data.data.accessToken || data.data.token)));
+      if (!token) {
+        if (up) { mode = 'login'; showDone(name, false); return; }
+        throw new Error('The server did not return a session token.');
       }
-
-      // --- Dynamic Particle Sparks System ---
-      const sparkCanvas = document.getElementById('spark-canvas');
-      const sparkCtx = sparkCanvas ? sparkCanvas.getContext('2d') : null;
-      let particles = [];
-      let sparkAnimId = null;
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-      function resizeSparkCanvas() {
-        if (!sparkCanvas) return;
-        const dpr = window.devicePixelRatio || 1;
-        sparkCanvas.width = window.innerWidth * dpr;
-        sparkCanvas.height = window.innerHeight * dpr;
-        if (sparkCtx) {
-          sparkCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        }
+      const display = (data.user && (data.user.name || data.user.username)) || (data.data && data.data.user && data.data.user.name) || name || id;
+      store.set(CONFIG.tokenKey, token);
+      store.set('todo_access_token', token);
+      store.set(CONFIG.userKey, display);
+      store.set('todo_user', JSON.stringify({ name: display, email: id }));
+      showDone(display, false);
+    } catch (e) {
+      if (!e.status) {
+        if (e.name === 'AbortError') { $('banner').className = 'banner'; $('banner').textContent = 'The server took too long to respond. Check that the API container is running, then try again.'; $('banner').hidden = false; }
+        else showDone(name || id, true);
+      } else {
+        $('banner').className = 'banner';
+        $('banner').textContent = e.status === 401 ? 'That email or password is not correct. Check both and try again.' : e.status === 409 ? 'An account with this email already exists. Sign in instead.' : e.message;
+        $('banner').hidden = false;
       }
+    }
+    btn.disabled = false; btn.innerHTML = '<span>' + label + '</span>';
+  }
 
-      window.addEventListener('resize', resizeSparkCanvas);
-      resizeSparkCanvas();
+  /* ---------- Wiring ---------- */
+  $('eye').innerHTML = EYE;
+  $('eye').addEventListener('click', () => {
+    const show = $('pw').type === 'password';
+    $('pw').type = show ? 'text' : 'password'; if ($('pw2')) $('pw2').type = show ? 'text' : 'password';
+    $('eye').innerHTML = show ? EYE_OFF : EYE; $('eye').setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+  });
+  $('pw').addEventListener('input', () => { $('meter').dataset.s = String(strength($('pw').value)); });
+  $('tabIn').addEventListener('click', () => setMode('login')); $('tabUp').addEventListener('click', () => setMode('register'));
+  $('switchBtn').addEventListener('click', () => setMode(mode === 'login' ? 'register' : 'login'));
+  $('authForm').addEventListener('submit', submit);
+  window.addEventListener('hashchange', fromHash);
 
-      const SPARK_PALETTES = [
-        { color: '#06b6d4', glow: 'rgba(6, 182, 212, 0.95)' },    // Electric Cyan
-        { color: '#ec4899', glow: 'rgba(236, 72, 153, 0.95)' },   // Neon Pink/Magenta
-        { color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.95)' },   // Golden Amber
-        { color: '#a855f7', glow: 'rgba(168, 85, 247, 0.95)' },   // Violet
-        { color: '#10b981', glow: 'rgba(16, 185, 129, 0.95)' },   // Emerald
-        { color: '#ffffff', glow: 'rgba(255, 255, 255, 1)' },      // Pure White
-        { color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.95)' }    // Radiant Sky
-      ];
-
-      function drawSparkleStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
-        let rot = Math.PI / 2 * 3;
-        let x = cx;
-        let y = cy;
-        const step = Math.PI / spikes;
-
-        ctx.beginPath();
-        ctx.moveTo(cx, cy - outerRadius);
-        for (let i = 0; i < spikes; i++) {
-          x = cx + Math.cos(rot) * outerRadius;
-          y = cy + Math.sin(rot) * outerRadius;
-          ctx.lineTo(x, y);
-          rot += step;
-
-          x = cx + Math.cos(rot) * innerRadius;
-          y = cy + Math.sin(rot) * innerRadius;
-          ctx.lineTo(x, y);
-          rot += step;
-        }
-        ctx.lineTo(cx, cy - outerRadius);
-        ctx.closePath();
-      }
-
-      function createSparkBurst(x, y) {
-        if (prefersReducedMotion.matches) return;
-
-        // Iridescent expanding shockwave ring
-        const shockwave = document.createElement('div');
-        shockwave.className = 'spark-shockwave';
-        shockwave.style.left = `${x}px`;
-        shockwave.style.top = `${y}px`;
-        document.body.appendChild(shockwave);
-        shockwave.addEventListener('animationend', () => {
-          shockwave.remove();
-        });
-
-        const count = 36 + Math.floor(Math.random() * 13);
-        for (let i = 0; i < count; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const speed = 5.5 + Math.random() * 9.5; 
-          const chosenColor = SPARK_PALETTES[Math.floor(Math.random() * SPARK_PALETTES.length)];
-          const maxLife = 33 + Math.floor(Math.random() * 19);
-
-          const randType = Math.random();
-          const type = randType < 0.22 ? 'star' : (randType < 0.65 ? 'micro' : 'ember');
-          const baseSize = type === 'micro' ? (1.5 + Math.random() * 1.5) : (type === 'ember' ? (3.2 + Math.random() * 2.8) : (4.0 + Math.random() * 2.5));
-
-          particles.push({
-            x: x,
-            y: y,
-            vx: Math.cos(angle) * speed,
-            vy: Math.sin(angle) * speed - (Math.random() * 1.8),
-            size: baseSize,
-            initialSize: baseSize,
-            color: chosenColor.color,
-            glow: chosenColor.glow,
-            life: 0,
-            maxLife: maxLife,
-            drag: 0.88 + Math.random() * 0.04,
-            gravity: 0.06 + Math.random() * 0.08,
-            type: type,
-            rotation: Math.random() * Math.PI,
-            rotSpeed: (Math.random() - 0.5) * 0.2
-          });
-        }
-
-        if (!sparkAnimId) {
-          sparkAnimId = requestAnimationFrame(updateParticles);
-        }
-      }
-
-      function updateParticles() {
-        if (!sparkCtx || !sparkCanvas) return;
-        sparkCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
-        for (let i = particles.length - 1; i >= 0; i--) {
-          const p = particles[i];
-          p.life++;
-
-          p.vx *= p.drag;
-          p.vy = p.vy * p.drag + p.gravity;
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rotation += p.rotSpeed;
-
-          const progress = p.life / p.maxLife;
-          const opacity = Math.max(0, Math.pow(1 - progress, 1.4));
-          const currentRadius = Math.max(0.2, p.initialSize * (1 - progress * 0.75));
-
-          sparkCtx.save();
-          sparkCtx.translate(p.x, p.y);
-          sparkCtx.rotate(p.rotation);
-          sparkCtx.fillStyle = p.color;
-          sparkCtx.globalAlpha = opacity;
-          sparkCtx.shadowBlur = 10 * (1 - progress * 0.4);
-          sparkCtx.shadowColor = p.glow;
-
-          if (p.type === 'star') {
-            drawSparkleStar(sparkCtx, 0, 0, 4, currentRadius * 1.4, currentRadius * 0.35);
-            sparkCtx.fill();
-          } else {
-            sparkCtx.beginPath();
-            sparkCtx.arc(0, 0, currentRadius, 0, Math.PI * 2);
-            sparkCtx.fill();
-          }
-
-          sparkCtx.restore();
-
-          if (p.life >= p.maxLife) {
-            particles.splice(i, 1);
-          }
-        }
-
-        if (particles.length > 0) {
-          sparkAnimId = requestAnimationFrame(updateParticles);
-        } else {
-          sparkCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-          sparkAnimId = null;
-        }
-      }
-
-      window.addEventListener('pointerdown', (e) => {
-        createSparkBurst(e.clientX, e.clientY);
-      });
-
-      function switchAuthMode(mode) {
-        hideAlert();
-        const signinTab = document.getElementById('tab-signin');
-        const signupTab = document.getElementById('tab-signup');
-        const signinForm = document.getElementById('form-signin');
-        const signupForm = document.getElementById('form-signup');
-
-        if (mode === 'signin') {
-          signinTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5';
-          signupTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5';
-          signinForm.classList.remove('hidden');
-          signupForm.classList.add('hidden');
-        } else {
-          signupTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5';
-          signinTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5';
-          signupForm.classList.remove('hidden');
-          signinForm.classList.add('hidden');
-        }
-      }
-
-      function togglePasswordVisibility(inputId, triggerBtn) {
-        const field = document.getElementById(inputId);
-        const icon = triggerBtn.querySelector('.material-symbols-outlined');
-        if (!field || !icon) return;
-
-        if (field.type === 'password') {
-          field.type = 'text';
-          icon.textContent = 'visibility_off';
-        } else {
-          field.type = 'password';
-          icon.textContent = 'visibility';
-        }
-      }
-
-      function showAlert(msg, isSuccess = false) {
-        const alertBox = document.getElementById('auth-alert');
-        const icon = document.getElementById('auth-alert-icon');
-        const text = document.getElementById('auth-alert-text');
-        if (!alertBox) return;
-
-        alertBox.className = isSuccess
-          ? 'mb-4 p-3 rounded-2xl text-xs font-medium flex items-center gap-2 bg-emerald-100 text-emerald-800 border border-emerald-300'
-          : 'mb-4 p-3 rounded-2xl text-xs font-medium flex items-center gap-2 bg-rose-100 text-rose-800 border border-rose-300';
-
-        icon.textContent = isSuccess ? 'check_circle' : 'error';
-        text.textContent = msg;
-        alertBox.classList.remove('hidden');
-      }
-
-      function hideAlert() {
-        const alertBox = document.getElementById('auth-alert');
-        if (alertBox) alertBox.classList.add('hidden');
-      }
-
-      // Handle Sign In with Real Backend
-      async function handleSignIn(e) {
-        e.preventDefault();
-        hideAlert();
-        const submitBtn = document.getElementById('btn-signin');
-        const email = document.getElementById('signin-email').value.trim();
-        const password = document.getElementById('signin-password').value;
-
-        if (!email || !password) {
-          showAlert('Please provide both email and password.');
-          return;
-        }
-
-        const rect = submitBtn.getBoundingClientRect();
-        createSparkBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
-
-        submitBtn.disabled = true;
-        const origContent = submitBtn.innerHTML;
-        submitBtn.innerHTML = `
-          <span class="material-symbols-outlined animate-spin text-[18px]">sync</span>
-          <span>Verifying Identity...</span>
-        `;
-
-        try {
-          const res = await fetch(`${API_AUTH}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-          });
-
-          const data = await res.json();
-          if (!res.ok || !data.success) {
-            throw new Error(data.error?.message || 'Invalid credentials or tenant authorization failed.');
-          }
-
-          // Save Tokens & User in LocalStorage
-          localStorage.setItem('todo_access_token', data.data.accessToken);
-          if (data.data.refreshToken) {
-            localStorage.setItem('todo_refresh_token', data.data.refreshToken);
-          }
-          localStorage.setItem('todo_user', JSON.stringify(data.data.user));
-
-          showAlert(`Welcome back, ${data.data.user.name}! Redirecting...`, true);
-          submitBtn.innerHTML = `
-            <span class="material-symbols-outlined text-[18px]">check_circle</span>
-            <span>Gateway Authorized</span>
-          `;
-
-          setTimeout(() => {
-            window.location.href = '/index.html';
-          }, 800);
-        } catch (err) {
-          showAlert(err.message || 'Connection to API failed.');
-          submitBtn.innerHTML = origContent;
-          submitBtn.disabled = false;
-        }
-      }
-
-      // Handle Sign Up with Real Backend
-      async function handleSignUp(e) {
-        e.preventDefault();
-        hideAlert();
-        const submitBtn = document.getElementById('btn-signup');
-        const name = document.getElementById('signup-name').value.trim();
-        const email = document.getElementById('signup-email').value.trim();
-        const password = document.getElementById('signup-password').value;
-
-        if (!name || !email || !password) {
-          showAlert('All fields are required for tenant registration.');
-          return;
-        }
-
-        if (password.length < 6) {
-          showAlert('Password must be at least 6 characters long.');
-          return;
-        }
-
-        const rect = submitBtn.getBoundingClientRect();
-        createSparkBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
-
-        submitBtn.disabled = true;
-        const origContent = submitBtn.innerHTML;
-        submitBtn.innerHTML = `
-          <span class="material-symbols-outlined animate-spin text-[18px]">sync</span>
-          <span>Provisioning Tenant...</span>
-        `;
-
-        try {
-          const res = await fetch(`${API_AUTH}/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, email, password })
-          });
-
-          const data = await res.json();
-          if (!res.ok || !data.success) {
-            throw new Error(data.error?.message || 'Registration failed. Email might already be in use.');
-          }
-
-          // Save session
-          localStorage.setItem('todo_access_token', data.data.accessToken);
-          if (data.data.refreshToken) {
-            localStorage.setItem('todo_refresh_token', data.data.refreshToken);
-          }
-          localStorage.setItem('todo_user', JSON.stringify(data.data.user));
-
-          showAlert(`Tenant created for ${data.data.user.name}! Loading Dashboard...`, true);
-          submitBtn.innerHTML = `
-            <span class="material-symbols-outlined text-[18px]">cloud_done</span>
-            <span>Tenant Provisioned</span>
-          `;
-
-          setTimeout(() => {
-            window.location.href = '/index.html';
-          }, 800);
-        } catch (err) {
-          showAlert(err.message || 'Failed to register account.');
-          submitBtn.innerHTML = origContent;
-          submitBtn.disabled = false;
-        }
-      }
-
-      // Check Existing Session on Load
-      try {
-        const savedUser = localStorage.getItem('todo_user');
-        const token = localStorage.getItem('todo_access_token');
-        if (savedUser && token) {
-          const userObj = JSON.parse(savedUser);
-          const pill = document.getElementById('active-session-pill');
-          const nameSpan = document.getElementById('active-user-name');
-          if (pill && nameSpan) {
-            nameSpan.textContent = `Active: ${userObj.name}`;
-            pill.classList.remove('hidden');
-            pill.classList.add('inline-flex');
-          }
-        }
-      } catch (err) {}
-    </script>
-  </main>
+  /* Health indicator */
+  (async () => {
+    try { await api('/health', { timeout: 3000 }); $('hDot').className = 'dot ok'; $('hText').textContent = 'API online'; }
+    catch (e) { $('hDot').className = 'dot' + (e.status ? ' down' : ''); $('hText').textContent = e.status ? 'API error ' + e.status : 'API offline · preview mode'; }
+  })();
+  fromHash();
+})();
+</script>
 </body>
 </html>

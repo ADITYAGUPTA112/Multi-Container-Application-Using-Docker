@@ -91,7 +91,7 @@ const getAllTodos = async (req, res, next) => {
  */
 const createTodo = async (req, res, next) => {
   try {
-    const { title, description, priority, dueDate, tags } = req.body;
+    const { title, description, priority, scope, dueDate, tags } = req.body;
     const userId = req.user ? req.user._id : req.body.userId;
 
     const newTodo = await Todo.create({
@@ -99,7 +99,8 @@ const createTodo = async (req, res, next) => {
       description: description ? description.trim() : '',
       isCompleted: false,
       userId,
-      priority: priority || 'medium',
+      priority: priority ? priority.toLowerCase() : 'medium',
+      scope: scope || 'DevOps',
       dueDate: dueDate ? new Date(dueDate) : null,
       tags: Array.isArray(tags) ? tags.map((t) => String(t).trim()).filter(Boolean) : [],
     });
@@ -172,13 +173,15 @@ const updateTodo = async (req, res, next) => {
       filter.userId = req.user._id;
     }
 
-    const { title, description, isCompleted, priority, dueDate, tags } = req.body;
+    const { title, description, isCompleted, completed, priority, scope, dueDate, tags } = req.body;
 
     const updateFields = {};
     if (title !== undefined) updateFields.title = title.trim();
     if (description !== undefined) updateFields.description = description ? description.trim() : '';
     if (isCompleted !== undefined) updateFields.isCompleted = isCompleted;
-    if (priority !== undefined) updateFields.priority = priority;
+    else if (completed !== undefined) updateFields.isCompleted = completed;
+    if (priority !== undefined) updateFields.priority = priority.toLowerCase();
+    if (scope !== undefined) updateFields.scope = scope;
     if (dueDate !== undefined) updateFields.dueDate = dueDate ? new Date(dueDate) : null;
     if (tags !== undefined) {
       updateFields.tags = Array.isArray(tags) ? tags.map((t) => String(t).trim()).filter(Boolean) : [];

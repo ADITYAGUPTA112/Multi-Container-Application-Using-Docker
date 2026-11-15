@@ -1,562 +1,671 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Multi-Container Todo Platform | DevOps & K8s Workspace</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            "surface": "#f9f9fd",
-            "surface-bright": "#f9f9fd",
-            "surface-container-lowest": "#ffffff",
-            "surface-container-low": "#f3f3f7",
-            "surface-container": "#ededf1",
-            "surface-container-high": "#e8e8ec",
-            "surface-container-highest": "#e2e2e6",
-            "on-surface": "#1a1c1f",
-            "on-surface-variant": "#444749",
-            "outline": "#747779",
-            "outline-variant": "#c4c7c9",
-            "primary": "#2563eb",
-            "on-primary": "#ffffff",
-            "secondary": "#475569",
-            "on-secondary": "#ffffff",
-            "error": "#dc2626",
-            "on-error": "#ffffff",
-            "error-container": "#fee2e2",
-            "on-error-container": "#991b1b",
-            "inverse-surface": "#1e293b",
-            "inverse-on-surface": "#f8fafc"
-          },
-          fontFamily: {
-            sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace']
-          }
-        }
-      }
-    };
-  </script>
-  <style>
-    body {
-      background-color: #f8fafc;
-      font-family: 'Inter', sans-serif;
-    }
-    .card-surface {
-      background-color: #ffffff;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
-    }
-    .subtle-input {
-      background-color: #f8fafc;
-      border: 1px solid #e2e8f0;
-      color: #0f172a;
-      transition: all 0.2s ease;
-    }
-    .subtle-input:focus {
-      background-color: #ffffff;
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
-      outline: none;
-    }
-  </style>
-</head>
-<body class="bg-slate-50 text-slate-900 antialiased font-sans min-h-screen py-8 px-4 sm:px-6 lg:px-8">
-
-<!-- Toast Notifications -->
-<div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
-
-<!-- Main Container -->
-<main class="max-w-5xl mx-auto space-y-6">
-
-  <!-- Header Section -->
-  <header class="card-surface rounded-3xl p-6 sm:p-7 border border-slate-200 relative overflow-hidden">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
-      <!-- Left: Logo & Platform Identity -->
-      <div class="flex items-start sm:items-center gap-4">
-        <div class="relative shrink-0 flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-50 border border-blue-200 shadow-sm text-blue-600">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-            Multi-Container Platform
-          </h1>
-          <!-- Tech Stack Pills -->
-          <div class="flex flex-wrap items-center gap-2 mt-2 text-xs text-slate-600">
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">Docker</span>
-            <span class="text-slate-400">·</span>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">Kubernetes</span>
-            <span class="text-slate-400">·</span>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">Jenkins</span>
-            <span class="text-slate-400">·</span>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">MongoDB</span>
-            <span class="text-slate-400">·</span>
-            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full bg-slate-100 font-mono text-[11px] border border-slate-200 font-medium">Redis</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Right: Navigation Links & Cluster Status -->
-      <div class="flex flex-wrap items-center gap-3 self-start md:self-center">
-        <!-- Telemetry Links -->
-        <a href="/api-docs" target="_blank" class="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[15px]">api</span>
-          <span>Swagger</span>
-        </a>
-        <a href="/topology.html" class="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[15px]">hub</span>
-          <span>Mesh</span>
-        </a>
-        <a href="/logs.html" class="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[15px]">description</span>
-          <span>Logs</span>
-        </a>
-
-        <!-- Cluster Status Indicator Badge -->
-        <div id="cluster-status-badge" class="px-4 py-2 rounded-full flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-semibold shadow-sm transition-colors duration-300">
-          <span class="relative flex h-2 w-2">
-            <span id="cluster-status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-            <span id="cluster-status-dot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
-          </span>
-          <span id="cluster-status-text">Cluster Online</span>
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-          <span class="font-mono text-[11px] text-emerald-700" id="cluster-node-text">MongoDB: 1ms • Redis: 0ms</span>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <!-- Metrics Overview -->
-  <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-    <!-- Metric 1: Total Tasks -->
-    <div class="card-surface rounded-2xl p-5 border border-slate-200 transition-all hover:shadow-md">
-      <div class="flex justify-between items-start">
-        <span class="text-[11px] font-bold tracking-wider uppercase text-slate-500">Total Workloads</span>
-        <span class="p-2 rounded-full bg-slate-100 text-slate-600">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </span>
-      </div>
-      <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-3xl font-bold tracking-tight text-slate-900" id="metric-total">0</span>
-        <span class="text-xs text-slate-500 font-mono">active pool</span>
-      </div>
-      <div class="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-        <div class="h-full bg-blue-600 rounded-full" style="width: 100%"></div>
-      </div>
-    </div>
-
-    <!-- Metric 2: Pending Tasks -->
-    <div class="card-surface rounded-2xl p-5 border border-slate-200 transition-all hover:shadow-md">
-      <div class="flex justify-between items-start">
-        <span class="text-[11px] font-bold tracking-wider uppercase text-amber-700">Pending Execution</span>
-        <span class="p-2 rounded-full bg-amber-50 text-amber-700">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </span>
-      </div>
-      <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-3xl font-bold tracking-tight text-amber-700" id="metric-pending">0</span>
-        <span class="text-xs text-amber-700/70 font-mono">in progress</span>
-      </div>
-      <div class="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-        <div id="metric-pending-bar" class="h-full bg-amber-500 rounded-full" style="width: 0%"></div>
-      </div>
-    </div>
-
-    <!-- Metric 3: Completed Tasks -->
-    <div class="card-surface rounded-2xl p-5 border border-slate-200 transition-all hover:shadow-md">
-      <div class="flex justify-between items-start">
-        <span class="text-[11px] font-bold tracking-wider uppercase text-emerald-700">Completed</span>
-        <span class="p-2 rounded-full bg-emerald-50 text-emerald-700">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        </span>
-      </div>
-      <div class="mt-2 flex items-baseline gap-2">
-        <span class="text-3xl font-bold tracking-tight text-emerald-700" id="metric-completed">0</span>
-        <span class="text-xs text-emerald-700/70 font-mono">successful</span>
-      </div>
-      <div class="mt-3.5 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-        <div id="metric-completed-bar" class="h-full bg-emerald-600 rounded-full" style="width: 0%"></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Todo Creation Card -->
-  <section class="card-surface rounded-3xl p-6 sm:p-7 border border-slate-200">
-    <h2 class="text-base font-bold tracking-tight text-slate-900 mb-4 flex items-center gap-2">
-      <span>Add New Task</span>
-      <span class="text-xs text-slate-500 font-normal">· Instant MongoDB & Redis write</span>
-    </h2>
-
-    <form id="create-task-form" class="space-y-4">
-      <div>
-        <label for="task-title-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Task Title</label>
-        <input type="text" id="task-title-input" placeholder="e.g. Verify Kubernetes ingress and rolling update..." required class="subtle-input w-full px-4 py-3 rounded-2xl text-sm" />
-      </div>
-
-      <div>
-        <label for="task-details-input" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Technical Details (Optional)</label>
-        <textarea id="task-details-input" rows="2" placeholder="e.g. Scale replica pods to 3 and check Prometheus memory consumption." class="subtle-input w-full px-4 py-2.5 rounded-2xl text-sm resize-none"></textarea>
-      </div>
-
-      <!-- Scope Pills & Submit Action Row -->
-      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-1">
-        <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-xs text-slate-600 font-medium mr-1">Scope:</span>
-          <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-slate-900 text-white border border-transparent font-medium shadow-sm transition" data-tag="DevOps">DevOps</button>
-          <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition font-medium" data-tag="Docker">Docker</button>
-          <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition font-medium" data-tag="K8s">K8s</button>
-          <button type="button" class="scope-pill px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition font-medium" data-tag="Database">Database</button>
-        </div>
-
-        <button type="submit" id="submit-btn" class="w-full sm:w-auto px-6 py-2.5 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition shadow-sm flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-          <span id="submit-btn-text">Add Task</span>
-        </button>
-      </div>
-    </form>
-  </section>
-
-  <!-- Todo List Section -->
-  <section class="card-surface rounded-3xl p-6 sm:p-7 border border-slate-200 space-y-5">
-    <!-- Controls & Filter Toolbar -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-200">
-      <div class="flex items-center gap-2">
-        <h3 class="text-base font-bold tracking-tight text-slate-900">Active Task Queue</h3>
-        <span class="text-xs font-mono px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-medium" id="task-badge-count">0 items</span>
-      </div>
-
-      <!-- Filter Buttons -->
-      <div class="flex items-center p-1 bg-slate-100 rounded-full text-xs font-medium text-slate-600">
-        <button onclick="filterTasks('all')" id="filter-all" class="filter-tab px-4 py-1.5 rounded-full text-white bg-blue-600 shadow-sm transition">All</button>
-        <button onclick="filterTasks('active')" id="filter-active" class="filter-tab px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 transition">Active</button>
-        <button onclick="filterTasks('completed')" id="filter-completed" class="filter-tab px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 transition">Completed</button>
-      </div>
-    </div>
-
-    <!-- Dynamic Tasks Container -->
-    <div id="todo-list" class="space-y-3">
-      <!-- Tasks rendered here -->
-    </div>
-  </section>
-
-</main>
-
-<!-- Interactive Scripts -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KubeOps Todo Engine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Domine:wght@400&family=EB+Garamond:ital,wght@0,600;1,500&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
 <script>
-  const API_BASE = '';
-  let allTodos = [];
-  let currentFilter = 'all';
-  let selectedScope = 'DevOps';
-
-  // Toast notification
-  function showToast(message, isError = false) {
-    const container = document.getElementById('toast-container');
-    const toast = document.createElement('div');
-    toast.className = `px-4 py-2.5 rounded-full text-xs font-semibold shadow-lg transition-all transform translate-y-2 opacity-0 pointer-events-auto flex items-center gap-2 ${isError ? 'bg-red-600 text-white' : 'bg-slate-900 text-white'}`;
-    toast.innerHTML = `<span>${message}</span>`;
-    container.appendChild(toast);
-    setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
-    setTimeout(() => {
-      toast.classList.add('opacity-0', '-translate-y-2');
-      setTimeout(() => toast.remove(), 300);
-    }, 2800);
-  }
-
-  // Poll Health
-  async function checkHealth() {
-    const badge = document.getElementById('cluster-status-badge');
-    const ping = document.getElementById('cluster-status-ping');
-    const dot = document.getElementById('cluster-status-dot');
-    const statusText = document.getElementById('cluster-status-text');
-    const nodeText = document.getElementById('cluster-node-text');
-
-    try {
-      const res = await fetch(`${API_BASE}/health`);
-      const data = await res.json();
-      if (res.ok && data.status === 'UP') {
-        if (badge) badge.className = 'px-4 py-2 rounded-full flex items-center gap-2.5 border border-emerald-300 bg-emerald-50 text-emerald-800 text-xs font-semibold shadow-sm transition-colors duration-300';
-        if (ping) ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75';
-        if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-emerald-600';
-        if (statusText) statusText.innerHTML = `Cluster Online <span class="text-emerald-700 font-normal">(connected)</span>`;
-        if (nodeText) {
-          const dbLat = data.services?.database?.latency || '1ms';
-          const redLat = data.services?.redis?.latency || '0ms';
-          nodeText.textContent = `MongoDB: ${dbLat} • Redis: ${redLat}`;
-          nodeText.className = 'font-mono text-[11px] text-emerald-700';
-        }
-      } else {
-        if (badge) badge.className = 'px-4 py-2 rounded-full flex items-center gap-2.5 border border-amber-300 bg-amber-50 text-amber-800 text-xs font-semibold shadow-sm transition-colors duration-300';
-        if (ping) ping.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-500 opacity-75';
-        if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-amber-600';
-        if (statusText) statusText.innerHTML = `Reconnecting <span class="text-amber-700 font-normal">(standby)</span>`;
-        if (nodeText) {
-          nodeText.textContent = 'Initializing cluster services';
-          nodeText.className = 'font-mono text-[11px] text-amber-700';
-        }
+  tailwind.config = {
+    theme: { extend: {
+      fontFamily: {
+        headline: ['"EB Garamond"', 'Georgia', 'serif'],
+        body: ['Domine', 'Georgia', 'serif'],
+        ui: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'monospace']
       }
-    } catch (err) {
-      if (badge) badge.className = 'px-4 py-2 rounded-full flex items-center gap-2.5 border border-rose-300 bg-rose-50 text-rose-800 text-xs font-semibold shadow-sm transition-colors duration-300';
-      if (ping) ping.className = 'hidden';
-      if (dot) dot.className = 'relative inline-flex rounded-full h-2 w-2 bg-rose-600';
-      if (statusText) statusText.innerHTML = `Offline <span class="text-rose-700 font-normal">(disconnected)</span>`;
-      if (nodeText) {
-        nodeText.textContent = 'API service unreachable';
-        nodeText.className = 'font-mono text-[11px] text-rose-700';
-      }
-    }
+    } }
+  };
+</script>
+<style>
+  /* Layout: sticky glass header, 280px inspector sidebar + fluid workspace (drawer below 1024px). Tokens follow DESIGN.md. */
+  :root {
+    --bg: #131313; --s-lowest: #0e0e0e; --s-low: #1b1c1b; --s: #1f201f; --s-high: #2a2a29; --s-highest: #353534;
+    --on: #e4e2e0; --on-var: #c4c7c9; --outline: #8e9193; --outline-var: #444749;
+    --primary: #c6c6c7; --on-primary: #2f3132;
+    --err: #ffb4ab; --err-c: #93000a; --on-err-c: #ffdad6;
+    --ok: #6ee7b7; --warn: #fbbf24; --info: #93c5fd;
+    --ease: cubic-bezier(.2, .8, .2, 1);
+    color-scheme: dark;
   }
-
-  // Load Todos
-  async function loadTodos() {
-    try {
-      const res = await fetch(`${API_BASE}/todos`);
-      const result = await res.json();
-      if (res.ok && result.success) {
-        allTodos = result.data || [];
-        renderTasks();
-      }
-    } catch (err) {
-      console.error('Failed to load todos:', err);
-    }
+  *, *::before, *::after { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { background: var(--bg); }
+  body {
+    margin: 0; background: var(--bg); color: var(--on);
+    font-family: 'Inter', system-ui, sans-serif; font-size: 14px; line-height: 1.5;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0 48px; min-height: 100%;
+    -webkit-font-smoothing: antialiased;
   }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 60; background: #1d1d1c; }
+  .atmosphere { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(900px 500px at 8% -8%, rgba(255,255,255,.05), transparent 70%),
+      linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 48px 48px,
+      linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px) 0 0 / 48px 48px; }
+  .wrap { position: relative; z-index: 1; max-width: 1280px; margin-inline: auto; }
+  .tnum { font-variant-numeric: tabular-nums; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-weight: 500; font-size: 12px; line-height: 16px; }
+  .label { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 12px; line-height: 16px; }
+  .eyebrow { font-family: 'Inter', sans-serif; font-weight: 500; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--on-var); }
+  .serif { font-family: 'EB Garamond', Georgia, serif; font-weight: 600; }
+  :focus-visible { outline: 2px solid var(--outline); outline-offset: 2px; }
 
-  // Render Tasks
-  function renderTasks() {
-    const listEl = document.getElementById('todo-list');
-    const badgeEl = document.getElementById('task-badge-count');
+  /* Header */
+  .topbar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; height: 64px; margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+    padding-inline: max(16px, env(safe-area-inset-left, 0px)); background: rgba(53,53,52,.62); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px);
+    border-bottom: 1px solid rgba(255,255,255,.10); box-shadow: 0 12px 40px rgba(0,0,0,.35); }
+  .topbar-in { max-width: 1280px; margin-inline: auto; height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 24px; line-height: 32px; white-space: nowrap; }
+  .brand em { font-style: italic; font-weight: 500; color: var(--on-var); }
+  .navlink { position: relative; font-size: 12px; font-weight: 500; color: var(--on-var); text-decoration: none; padding: 4px 0; transition: color .15s ease-out; }
+  .navlink::after { content: ""; position: absolute; left: 0; bottom: 0; height: 1px; width: 100%; background: var(--on); transform: scaleX(0); transform-origin: left; transition: transform .2s var(--ease); }
+  .navlink:hover { color: var(--on); } .navlink:hover::after { transform: scaleX(1); }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 9999px; background: var(--s); border: 1px solid rgba(68,71,73,.7); white-space: nowrap; }
+  .dot { position: relative; width: 8px; height: 8px; border-radius: 9999px; background: var(--ok); flex: none; }
+  .dot::after { content: ""; position: absolute; inset: -4px; border-radius: 9999px; border: 1px solid currentColor; opacity: 0; animation: pulse 2s ease-in-out infinite; }
+  .dot[data-s="ok"] { background: var(--ok); color: var(--ok); }
+  .dot[data-s="warn"] { background: var(--warn); color: var(--warn); }
+  .dot[data-s="down"] { background: var(--err); color: var(--err); }
+  .dot[data-s="idle"] { background: var(--outline); color: var(--outline); }
+  .dot[data-s="idle"]::after { animation: none; }
+  @keyframes pulse { 0% { transform: scale(.6); opacity: .8; } 100% { transform: scale(1.8); opacity: 0; } }
+  .avatar { width: 32px; height: 32px; border-radius: 9999px; background: var(--s-highest); border: 1px solid rgba(68,71,73,.9); display: grid; place-items: center; font-size: 12px; font-weight: 600; flex: none; }
+  .iconbtn { width: 36px; height: 36px; border-radius: 6px; display: inline-grid; place-items: center; background: transparent; border: 1px solid transparent; color: var(--on-var); cursor: pointer; transition: background .15s ease-out, color .15s ease-out; }
+  .iconbtn:hover { background: var(--s-high); color: var(--on); }
+  .iconbtn.danger:hover { color: var(--err); }
+  svg.i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 
-    let filtered = allTodos;
-    if (currentFilter === 'active') {
-      filtered = allTodos.filter(t => !t.isCompleted);
-    } else if (currentFilter === 'completed') {
-      filtered = allTodos.filter(t => t.isCompleted);
-    }
+  /* Surfaces */
+  .card { background: var(--s); border: 1px solid rgba(68,71,73,.5); border-radius: 8px; transition: background .15s ease-out, border-color .15s ease-out; }
+  .card.hov:hover { background: var(--s-high); border-color: var(--outline-var); }
+  .well { background: var(--s-lowest); border: 1px solid rgba(68,71,73,.5); border-radius: 8px; }
 
-    // Update Counts
-    const totalCount = allTodos.length;
-    const completedCount = allTodos.filter(t => t.isCompleted).length;
-    const pendingCount = totalCount - completedCount;
+  /* Metrics */
+  .metric { padding: 20px 24px; position: relative; overflow: hidden; }
+  .metric[data-k="pending"] { border-top: 2px solid rgba(251,191,36,.6); }
+  .metric[data-k="done"] { border-top: 2px solid rgba(110,231,183,.6); }
+  .metric-icon { position: absolute; top: 18px; right: 20px; width: 36px; height: 36px; border-radius: 9999px; background: var(--s-high); display: grid; place-items: center; color: var(--on-var); }
+  .metric[data-k="pending"] .metric-icon { color: var(--warn); } .metric[data-k="done"] .metric-icon { color: var(--ok); }
+  .metric-n { font-family: 'EB Garamond', Georgia, serif; font-weight: 600; font-size: 40px; line-height: 44px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .bar { height: 4px; border-radius: 9999px; background: var(--s-high); overflow: hidden; margin-top: 12px; }
+  .bar > span { display: block; height: 100%; width: 0; background: var(--ok); border-radius: inherit; transition: width .5s ease-out; }
 
-    document.getElementById('metric-total').textContent = totalCount;
-    document.getElementById('metric-pending').textContent = pendingCount;
-    document.getElementById('metric-completed').textContent = completedCount;
+  /* Sidebar */
+  .scope { display: flex; align-items: center; gap: 12px; width: 100%; height: 40px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; color: var(--on-var); font: 500 13px 'Inter', sans-serif; cursor: pointer; text-align: left; position: relative; transition: background .15s ease-out, color .15s ease-out; }
+  .scope:hover { background: rgba(42,42,41,.7); color: var(--on); }
+  .scope[aria-current="true"] { background: var(--s-high); color: var(--on); }
+  .scope[aria-current="true"]::before { content: ""; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; border-radius: 2px; background: var(--primary); }
+  .scope .count { margin-left: auto; color: var(--on-var); }
+  .kv { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; border-bottom: 1px dashed rgba(68,71,73,.5); }
+  .kv:last-child { border-bottom: 0; }
+  .kv .k { color: var(--on-var); } .kv .v { color: var(--on); text-align: right; }
+  .seg { display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px; margin-top: 10px; }
+  .seg i { height: 6px; border-radius: 2px; background: var(--s-high); }
+  .seg i.on { background: var(--primary); }
 
-    const compPercent = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
-    const pendPercent = totalCount ? Math.round((pendingCount / totalCount) * 100) : 0;
+  /* Forms */
+  .input { width: 100%; height: 48px; padding: 0 14px; background: var(--s-lowest); color: var(--on); border: 1px solid var(--outline-var); border-radius: 4px; font: 400 16px 'Domine', Georgia, serif; transition: border-color .15s ease-out; }
+  .input::placeholder { color: rgba(196,199,201,.6); }
+  .input:hover { border-color: var(--outline); }
+  .input:focus { border-color: var(--outline); outline: 2px solid var(--outline); outline-offset: 2px; }
+  select.input { appearance: none; -webkit-appearance: none; padding-right: 40px; font: 500 14px 'Inter', sans-serif;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23c4c7c9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat: no-repeat; background-position: right 12px center; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 4px; border: 1px solid var(--outline-var); background: transparent; color: var(--on); font: 500 13px 'Inter', sans-serif; cursor: pointer; transition: background .15s ease-out, border-color .15s ease-out, opacity .15s; }
+  .btn:hover { background: var(--s-high); border-color: var(--outline); }
+  .btn.primary { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+  .btn.primary:hover { background: #dcdcdd; }
+  .btn:disabled { opacity: .6; cursor: progress; }
+  .spin { width: 16px; height: 16px; border-radius: 9999px; border: 2px solid rgba(47,49,50,.3); border-top-color: var(--on-primary); animation: rot .7s linear infinite; }
+  @keyframes rot { to { transform: rotate(360deg); } }
+  .seg-toggle { display: inline-flex; gap: 6px; padding: 4px; background: var(--s-lowest); border: 1px solid var(--outline-var); border-radius: 6px; }
+  .seg-toggle button { height: 38px; padding: 0 16px; border-radius: 4px; border: 1px solid transparent; background: transparent; color: var(--on-var); font: 500 12px 'Inter', sans-serif; cursor: pointer; transition: all .15s ease-out; }
+  .seg-toggle button:hover { color: var(--on); }
+  .seg-toggle button[aria-pressed="true"][data-p="High"] { color: var(--err); border-color: var(--err); background: rgba(255,180,171,.12); }
+  .seg-toggle button[aria-pressed="true"][data-p="Medium"] { color: var(--warn); border-color: var(--warn); background: rgba(251,191,36,.12); }
+  .seg-toggle button[aria-pressed="true"][data-p="Low"] { color: var(--ok); border-color: var(--ok); background: rgba(110,231,183,.12); }
 
-    document.getElementById('metric-completed-bar').style.width = `${compPercent}%`;
-    document.getElementById('metric-pending-bar').style.width = `${pendPercent}%`;
-    badgeEl.textContent = `${filtered.length} item${filtered.length === 1 ? '' : 's'}`;
+  /* Task cards */
+  .task { display: flex; align-items: flex-start; gap: 14px; padding: 16px; animation: enter .2s var(--ease) both; }
+  @keyframes enter { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  .check { width: 20px; height: 20px; margin-top: 2px; border-radius: 2px; border: 1.5px solid var(--outline); background: transparent; display: grid; place-items: center; cursor: pointer; flex: none; padding: 0; transition: background .15s ease-out, border-color .15s ease-out; }
+  .check:hover { border-color: var(--on); }
+  .check svg { width: 14px; height: 14px; stroke: var(--bg); fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 20; stroke-dashoffset: 20; transition: stroke-dashoffset .15s ease-out; }
+  .check[aria-checked="true"] { background: var(--ok); border-color: var(--ok); }
+  .check[aria-checked="true"] svg { stroke-dashoffset: 0; }
+  .task-title { font: 400 16px/24px 'Domine', Georgia, serif; overflow-wrap: anywhere; transition: opacity .15s; }
+  .task.done .task-title { text-decoration: line-through; opacity: .5; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 9px; border-radius: 9999px; border: 1px solid var(--outline-var); font: 500 11px 'Inter', sans-serif; color: var(--on-var); white-space: nowrap; }
+  .chip[data-p="High"] { color: var(--err); border-color: rgba(255,180,171,.45); background: rgba(255,180,171,.10); }
+  .chip[data-p="Medium"] { color: var(--warn); border-color: rgba(251,191,36,.45); background: rgba(251,191,36,.10); }
+  .chip[data-p="Low"] { color: var(--ok); border-color: rgba(110,231,183,.45); background: rgba(110,231,183,.10); }
+  .cached { display: inline-flex; align-items: center; gap: 4px; color: var(--info); }
+  .cached svg.i { width: 12px; height: 12px; }
+  .task .actions { opacity: 0; transition: opacity .15s; }
+  .task:hover .actions, .task:focus-within .actions { opacity: 1; }
+  @media (hover: none) { .task .actions { opacity: 1; } }
+  .skel { height: 72px; border-radius: 8px; background: linear-gradient(100deg, var(--s) 30%, var(--s-high) 50%, var(--s) 70%) 0 0 / 220% 100%; animation: shimmer 1.8s ease-in-out infinite; border: 1px solid rgba(68,71,73,.4); }
+  @keyframes shimmer { from { background-position: 120% 0; } to { background-position: -120% 0; } }
 
-    if (filtered.length === 0) {
-      listEl.innerHTML = `
-        <div class="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-slate-200">
-          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-3">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>
-          </div>
-          <p class="text-sm font-semibold text-slate-700">No tasks in this view</p>
-          <p class="text-xs text-slate-500 mt-1">Add a new task above or switch your active filters.</p>
+  /* Overlays */
+  .scrim { position: fixed; inset: 0; z-index: 70; background: rgba(0,0,0,.6); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); display: grid; place-items: center; padding: 16px; }
+  .modal { width: 100%; max-width: 420px; background: rgba(53,53,52,.82); -webkit-backdrop-filter: blur(24px); backdrop-filter: blur(24px); border: 1px solid rgba(255,255,255,.10); border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.5); padding: 28px; animation: pop .2s ease-out both; }
+  @keyframes pop { from { opacity: 0; transform: scale(.97); } to { opacity: 1; transform: none; } }
+  .tabs { position: relative; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--outline-var); }
+  .tabs button { height: 40px; background: none; border: 0; color: var(--on-var); font: 500 13px 'Inter', sans-serif; cursor: pointer; }
+  .tabs button[aria-selected="true"] { color: var(--on); }
+  .tabs .ink { position: absolute; bottom: -1px; left: 0; width: 50%; height: 2px; background: var(--primary); transition: transform .2s var(--ease); }
+  .banner { padding: 10px 12px; border-radius: 4px; background: var(--err-c); color: var(--on-err-c); font-size: 12px; }
+  .drawer-scrim { position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,.55); }
+  .toast { position: fixed; z-index: 80; left: 50%; transform: translateX(-50%); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); display: flex; align-items: center; gap: 16px; padding: 10px 14px 10px 16px; background: var(--s-highest); border: 1px solid rgba(255,255,255,.12); border-radius: 8px; box-shadow: 0 20px 60px rgba(0,0,0,.5); animation: enter .2s var(--ease) both; max-width: calc(100vw - 32px); }
+
+  /* Sidebar placement */
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; padding-top: 24px; }
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+  @media (min-width: 1024px) { .layout { grid-template-columns: 280px minmax(0, 1fr); } .sidebar { position: sticky; top: calc(88px + env(safe-area-inset-top, 0px)); align-self: start; } }
+  @media (max-width: 1023px) {
+    .sidebar { position: fixed; z-index: 56; top: 0; bottom: 0; left: 0; width: min(320px, 86vw); padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px max(16px, env(safe-area-inset-left, 0px)); background: var(--bg); border-right: 1px solid var(--outline-var); overflow-y: auto; transform: translateX(-100%); transition: transform .2s var(--ease); }
+    .sidebar.open { transform: none; }
+  }
+  .chips-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+  .chips-row::-webkit-scrollbar { display: none; }
+  .chips-row button { flex: none; height: 34px; padding: 0 14px; border-radius: 9999px; border: 1px solid var(--outline-var); background: transparent; color: var(--on-var); font: 500 12px 'Inter', sans-serif; cursor: pointer; }
+  .chips-row button[aria-pressed="true"] { background: var(--s-high); color: var(--on); border-color: var(--outline); }
+
+  @media (max-width: 639px) { .iconbtn, .check { min-width: 44px; min-height: 44px; } .check { min-width: 20px; min-height: 20px; } .task .actions .iconbtn { width: 44px; height: 44px; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="atmosphere" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="flex items-center gap-3 min-w-0">
+      <button class="iconbtn lg:hidden" id="menuBtn" aria-label="Open navigation"><svg class="i" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div class="brand">KubeOps <em>Todo Engine</em></div>
+      <nav class="hidden xl:flex items-center gap-6 ml-8" aria-label="Telemetry tools">
+        <a class="navlink" id="lnkDocs" href="/api-docs" target="_blank" rel="noopener">Swagger API</a>
+        <a class="navlink" id="lnkProm" href="/metrics" target="_blank" rel="noopener">Prometheus</a>
+        <a class="navlink" id="lnkTopo" href="/topology.html">Topology</a>
+        <a class="navlink" id="lnkAudit" href="/logs.html">Audit Logs</a>
+      </nav>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="pill" id="healthPill" role="status" aria-live="polite">
+        <span class="dot" data-s="idle" id="healthDot"></span>
+        <span class="mono tnum hidden sm:inline" id="healthText">Checking cluster…</span>
+        <span class="mono tnum sm:hidden" id="healthTextShort">…</span>
+      </div>
+      <div class="flex items-center gap-2" id="userChip" hidden>
+        <div class="avatar" id="avatar">A</div>
+        <div class="hidden md:block leading-tight">
+          <div class="label" id="userName">User</div>
+          <div class="mono" style="color: var(--on-var); font-size: 11px;" id="userRole">tenant</div>
         </div>
-      `;
+        <button class="iconbtn" id="signOut" aria-label="Sign out" title="Sign out"><svg class="i" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="layout">
+    <div class="drawer-scrim lg:hidden" id="drawerScrim" hidden></div>
+    <aside class="sidebar" id="sidebar" aria-label="Scope and engine telemetry">
+      <section class="card p-3">
+        <div class="eyebrow px-3 pt-2 pb-3">Scope</div>
+        <nav id="scopeList" class="flex flex-col gap-1"></nav>
+      </section>
+
+      <section class="card p-5">
+        <div class="eyebrow pb-2">Engine monitor</div>
+        <div class="kv"><span class="flex items-center gap-2 label"><span class="dot" data-s="idle" id="dotMongo"></span>MongoDB primary</span><span class="mono tnum v" id="valMongo">—</span></div>
+        <div class="kv"><span class="flex items-center gap-2 label"><span class="dot" data-s="idle" id="dotRedis"></span>Redis cache</span><span class="mono tnum v" id="valRedis">—</span></div>
+        <div class="kv"><span class="flex items-center gap-2 label"><span class="dot" data-s="idle" id="dotPods"></span>Pod replicas</span><span class="mono tnum v" id="valPods">—</span></div>
+      </section>
+
+      <section class="well p-5">
+        <div class="eyebrow pb-2">Kubernetes node</div>
+        <div class="kv mono"><span class="k">Node</span><span class="v">desktop-control-plane</span></div>
+        <div class="kv mono"><span class="k">Orchestrator</span><span class="v">kind v1.36.1</span></div>
+        <div class="kv mono"><span class="k">HPA</span><span class="v">2 → 10 pods</span></div>
+        <div class="seg" id="hpaSeg" aria-hidden="true"></div>
+        <div class="mono flex justify-between pt-2" style="color: var(--on-var); font-size: 11px;"><span>min 2</span><span id="hpaNow">now 3</span><span>max 10</span></div>
+      </section>
+    </aside>
+
+    <main class="min-w-0 flex flex-col gap-6" id="main">
+      <div class="chips-row lg:hidden" id="chipsRow" aria-label="Scope filter"></div>
+
+      <section class="grid grid-cols-1 sm:grid-cols-3 gap-4" aria-label="Task metrics">
+        <div class="card hov metric" data-k="total">
+          <div class="metric-icon"><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          <div class="eyebrow">Total tasks</div>
+          <div class="metric-n" id="mTotal">0</div>
+          <div class="label" style="color: var(--on-var);">across all scopes</div>
+        </div>
+        <div class="card hov metric" data-k="pending">
+          <div class="metric-icon"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+          <div class="eyebrow">Pending</div>
+          <div class="metric-n" id="mPending">0</div>
+          <div class="label" style="color: var(--on-var);">awaiting attention</div>
+        </div>
+        <div class="card hov metric" data-k="done">
+          <div class="metric-icon"><svg class="i" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+          <div class="eyebrow">Completed</div>
+          <div class="metric-n" id="mDone">0</div>
+          <div class="label" style="color: var(--on-var);"><span class="tnum" id="mPct">0%</span> complete</div>
+          <div class="bar" role="progressbar" aria-label="Completion" aria-valuemin="0" aria-valuemax="100" id="mBar"><span id="mBarFill"></span></div>
+        </div>
+      </section>
+
+      <section class="card p-6" aria-labelledby="newTaskTitle">
+        <h2 class="serif m-0" id="newTaskTitle" style="font-size: 24px; line-height: 32px;">New task</h2>
+        <form id="taskForm" class="flex flex-col gap-4 mt-4" autocomplete="off">
+          <label class="sr-only" for="taskInput">Task description</label>
+          <input class="input" id="taskInput" name="title" placeholder="Describe the task, e.g. Rotate MongoDB credentials" maxlength="140" required>
+          <div class="flex flex-wrap items-center gap-3">
+            <div class="seg-toggle" role="group" aria-label="Priority" id="prioGroup">
+              <button type="button" data-p="High" aria-pressed="false">High</button>
+              <button type="button" data-p="Medium" aria-pressed="true">Medium</button>
+              <button type="button" data-p="Low" aria-pressed="false">Low</button>
+            </div>
+            <label class="sr-only" for="scopeSelect">Workload scope</label>
+            <select class="input" id="scopeSelect" style="width: auto; min-width: 190px; height: 48px;"></select>
+            <button class="btn primary ml-auto" id="addBtn" type="submit"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Add task</span></button>
+          </div>
+        </form>
+      </section>
+
+      <section aria-labelledby="feedTitle">
+        <div class="flex items-end justify-between gap-3 pb-3">
+          <h2 class="serif m-0" id="feedTitle" style="font-size: 24px; line-height: 32px;">Task feed</h2>
+          <div class="mono" style="color: var(--on-var);" id="feedMeta">—</div>
+        </div>
+        <div class="flex flex-col gap-3" id="feed" aria-live="polite"></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="scrim" id="authScrim" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="brand" id="authTitle">KubeOps <em>Todo Engine</em></div>
+    <p class="m-0 mt-1" style="color: var(--on-var); font-size: 13px;">Each account gets its own isolated task collection.</p>
+    <div class="tabs mt-5" role="tablist">
+      <button role="tab" id="tabIn" aria-selected="true">Sign in</button>
+      <button role="tab" id="tabUp" aria-selected="false">Create account</button>
+      <span class="ink" id="tabInk"></span>
+    </div>
+    <form id="authForm" class="flex flex-col gap-4 mt-5" autocomplete="on">
+      <div id="nameRow" hidden>
+        <label class="label block pb-1" for="authName" style="color: var(--on-var);">Full name</label>
+        <input class="input" id="authName" name="name" autocomplete="name" style="font-family: Inter, sans-serif; font-size: 14px;">
+      </div>
+      <div>
+        <label class="label block pb-1" for="authId" style="color: var(--on-var);">Email or username</label>
+        <input class="input" id="authId" name="username" autocomplete="username" required style="font-family: Inter, sans-serif; font-size: 14px;">
+      </div>
+      <div>
+        <label class="label block pb-1" for="authPw" style="color: var(--on-var);">Password</label>
+        <div class="relative">
+          <input class="input" id="authPw" name="password" type="password" autocomplete="current-password" minlength="6" required style="font-family: Inter, sans-serif; font-size: 14px; padding-right: 48px;">
+          <button type="button" class="iconbtn" id="pwToggle" aria-label="Show password" style="position: absolute; right: 6px; top: 6px;"><svg class="i" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>
+        </div>
+        <div class="label pt-1" id="pwHint" style="color: var(--on-var);" hidden>At least 6 characters.</div>
+      </div>
+      <div class="banner" id="authErr" role="alert" hidden></div>
+      <button class="btn primary w-full" id="authBtn" type="submit"><span>Sign in</span></button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden>
+  <span class="label" id="toastMsg"></span>
+  <button class="btn" id="toastUndo" style="height: 32px; padding: 0 12px;" hidden>Undo</button>
+</div>
+
+<script>
+(() => {
+  /* ---------- Config: edit these to match your deployment ---------- */
+  const CONFIG = {
+    apiBase: (window.KUBEOPS_CONFIG && window.KUBEOPS_CONFIG.apiBase) || '',   // '' = same origin (Nginx proxy)
+    docsUrl: '/api-docs', metricsUrl: '/metrics', topologyUrl: '/topology.html', auditUrl: '/logs.html',
+    healthEveryMs: 8000, tokenKey: 'kubeops_token', userKey: 'kubeops_user'
+  };
+  const SCOPES = ['DevOps', 'Infrastructure', 'Database', 'Security', 'Backend'];
+  const ICON = {
+    all: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+    DevOps: '<svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4"/></svg>',
+    Infrastructure: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="1"/><rect x="3" y="14" width="18" height="6" rx="1"/><path d="M7 7h.01M7 17h.01"/></svg>',
+    Database: '<svg class="i" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>',
+    Security: '<svg class="i" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 5 3.4 8.4 8 9 4.6-.6 8-4 8-9V6l-8-3z"/></svg>',
+    Backend: '<svg class="i" viewBox="0 0 24 24"><path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"/></svg>',
+    bolt: '<svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg>',
+    trash: '<svg class="i" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6M10 11v6M14 11v6"/></svg>',
+    check: '<svg viewBox="0 0 24 24"><path d="M5 12.5 10 17.5 19 7"/></svg>',
+    eye: '<svg class="i" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+    eyeOff: '<svg class="i" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 6.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6A17 17 0 0 0 2 12s3.5 7 10 7a10 10 0 0 0 4.2-.9M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>'
+  };
+
+  /* ---------- State ---------- */
+  const $ = (id) => document.getElementById(id);
+  const state = { todos: [], scope: 'All', priority: 'Medium', token: null, user: null, demo: false, cached: false, mode: 'login', pods: 3 };
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    del(k) { try { localStorage.removeItem(k); } catch {} }
+  };
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  /* ---------- API layer ---------- */
+  async function api(path, opts = {}) {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), opts.timeout || 6000);
+    try {
+      const res = await fetch(CONFIG.apiBase + path, {
+        method: opts.method || 'GET',
+        headers: { 'Content-Type': 'application/json', ...(state.token ? { Authorization: 'Bearer ' + state.token } : {}) },
+        body: opts.body ? JSON.stringify(opts.body) : undefined,
+        signal: ctrl.signal
+      });
+      const type = res.headers.get('content-type') || '';
+      const data = type.includes('json') ? await res.json().catch(() => null) : null;
+      if (!res.ok) { const e = new Error((data && (data.message || (data.error && data.error.message) || data.error)) || ('Request failed (' + res.status + ')')); e.status = res.status; throw e; }
+      return { data, headers: res.headers };
+    } finally { clearTimeout(timer); }
+  }
+  const norm = (t) => ({
+    id: t._id || t.id,
+    title: t.title || t.text || t.description || t.task || '',
+    completed: !!(t.completed ?? t.done ?? t.isCompleted ?? (t.status === 'completed' || t.status === 'done')),
+    priority: ((p) => p ? p[0].toUpperCase() + p.slice(1).toLowerCase() : 'Medium')(String(t.priority || 'medium')),
+    scope: t.scope || t.tag || t.category || 'DevOps',
+    createdAt: t.createdAt || t.created_at || t.timestamp || Date.now()
+  });
+
+  /* ---------- Demo data (used when the API is unreachable) ---------- */
+  const ago = (m) => Date.now() - m * 60000;
+  const demoSeed = () => ([
+    { id: 'd1', title: 'Roll out HPA tuning for the API deployment', completed: false, priority: 'High', scope: 'DevOps', createdAt: ago(18) },
+    { id: 'd2', title: 'Rotate MongoDB application credentials', completed: false, priority: 'High', scope: 'Security', createdAt: ago(75) },
+    { id: 'd3', title: 'Add Redis cache invalidation on task update', completed: true, priority: 'Medium', scope: 'Backend', createdAt: ago(190) },
+    { id: 'd4', title: 'Provision a second kind worker node', completed: false, priority: 'Medium', scope: 'Infrastructure', createdAt: ago(320) },
+    { id: 'd5', title: 'Enable MongoDB replica set oplog alerts in Prometheus', completed: true, priority: 'Low', scope: 'Database', createdAt: ago(900) },
+    { id: 'd6', title: 'Write Jenkins stage for image vulnerability scan', completed: false, priority: 'Medium', scope: 'DevOps', createdAt: ago(1500) }
+  ]);
+
+  /* ---------- Utilities ---------- */
+  function relTime(v) {
+    const d = typeof v === 'number' ? v : Date.parse(v);
+    if (!d) return '—';
+    const m = Math.max(0, Math.round((Date.now() - d) / 60000));
+    if (m < 1) return 'just now';
+    if (m < 60) return m + 'm ago';
+    if (m < 1440) return Math.round(m / 60) + 'h ago';
+    return Math.round(m / 1440) + 'd ago';
+  }
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function countTo(el, to) {
+    const from = parseInt(el.dataset.v || '0', 10) || 0;
+    el.dataset.v = String(to);
+    if (reduce || from === to) { el.textContent = to; return; }
+    const t0 = performance.now();
+    const step = (t) => {
+      const p = Math.min(1, (t - t0) / 300);
+      el.textContent = Math.round(from + (to - from) * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+  let toastTimer;
+  function toast(msg, onUndo) {
+    $('toastMsg').textContent = msg;
+    $('toastUndo').hidden = !onUndo;
+    $('toast').hidden = false;
+    $('toast').style.animation = 'none'; void $('toast').offsetWidth; $('toast').style.animation = '';
+    $('toastUndo').onclick = () => { clearTimeout(toastTimer); $('toast').hidden = true; onUndo && onUndo(); };
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { $('toast').hidden = true; }, 5000);
+  }
+
+  /* ---------- Rendering ---------- */
+  function renderScopes() {
+    const counts = { All: state.todos.length };
+    SCOPES.forEach((s) => counts[s] = state.todos.filter((t) => t.scope === s).length);
+    const names = ['All', ...SCOPES];
+    $('scopeList').innerHTML = names.map((n) =>
+      `<button class="scope" data-scope="${n}" aria-current="${state.scope === n}">${ICON[n === 'All' ? 'all' : n]}<span>${n === 'All' ? 'All tasks' : n}</span><span class="count mono tnum">${counts[n] ?? 0}</span></button>`).join('');
+    $('chipsRow').innerHTML = names.map((n) => `<button data-scope="${n}" aria-pressed="${state.scope === n}">${n === 'All' ? 'All tasks' : n}</button>`).join('');
+  }
+  function renderMetrics() {
+    const total = state.todos.length, done = state.todos.filter((t) => t.completed).length, pending = total - done;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+    countTo($('mTotal'), total); countTo($('mPending'), pending); countTo($('mDone'), done);
+    $('mPct').textContent = pct + '%';
+    $('mBarFill').style.width = pct + '%';
+    $('mBar').setAttribute('aria-valuenow', String(pct));
+  }
+  function renderFeed(animate = true) {
+    const list = state.todos.filter((t) => state.scope === 'All' || t.scope === state.scope)
+      .sort((a, b) => Number(a.completed) - Number(b.completed) || (Date.parse(b.createdAt) || b.createdAt) - (Date.parse(a.createdAt) || a.createdAt));
+    $('feedMeta').textContent = list.length + (list.length === 1 ? ' task' : ' tasks') + (state.scope === 'All' ? '' : ' · ' + state.scope);
+    if (!list.length) {
+      $('feed').innerHTML = `<div class="card text-center" style="padding: 48px 24px;"><div class="serif" style="font-size: 24px; line-height: 32px;">Nothing here yet.</div><p class="m-0 mt-1" style="color: var(--on-var);">Add a task above to start this scope's feed.</p><button class="btn mt-4" id="focusInput">Write a task</button></div>`;
       return;
     }
-
-    listEl.innerHTML = filtered.map(todo => {
-      const isDone = todo.isCompleted;
-      const desc = escapeHtml(todo.description || '');
-      const title = escapeHtml(todo.title);
-
-      // Extract Scope Tag if present
-      let scopeTag = 'Task';
-      let cleanDesc = desc;
-      const match = desc.match(/^\[(.*?)\]\s*(.*)$/);
-      if (match) {
-        scopeTag = match[1];
-        cleanDesc = match[2];
-      }
-
-      return `
-        <div class="group flex items-start justify-between gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-slate-300 transition-all hover:shadow-sm" data-id="${todo._id}">
-          <div class="flex items-start gap-3.5 flex-1 min-w-0">
-            <!-- Checkbox -->
-            <button onclick="toggleTask('${todo._id}', ${!isDone})" class="mt-0.5 shrink-0 w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${isDone ? 'bg-emerald-600 border-emerald-600 text-white' : 'border-slate-300 hover:border-blue-600 bg-white'}">
-              ${isDone ? '<svg class="w-3.5 h-3.5 stroke-[3]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>' : ''}
-            </button>
-
-            <!-- Text Content -->
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-full font-mono ${getTagStyle(scopeTag)}">${scopeTag}</span>
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-full ${getPriorityStyle(todo.priority)}">${todo.priority || 'medium'}</span>
-                <h4 class="text-sm font-semibold text-slate-900 truncate ${isDone ? 'line-through text-slate-400' : ''}">${title}</h4>
-              </div>
-              ${cleanDesc ? `<p class="text-xs text-slate-500 mt-1 leading-relaxed ${isDone ? 'line-through text-slate-400' : ''}">${cleanDesc}</p>` : ''}
-              <div class="flex items-center gap-3 mt-2 text-[11px] text-slate-400 font-mono">
-                <span>ID: ${todo._id.slice(-6)}</span>
-                <span>•</span>
-                <span>${new Date(todo.createdAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Actions -->
-          <div class="shrink-0 flex items-center gap-1 opacity-80 group-hover:opacity-100 transition">
-            <button onclick="deleteTask('${todo._id}')" class="p-1.5 rounded-full hover:bg-red-50 text-slate-400 hover:text-red-600 transition" title="Delete Task">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
+    $('feed').innerHTML = list.map((t, i) => `
+      <article class="card hov task ${t.completed ? 'done' : ''}" data-id="${esc(t.id)}" style="${animate ? 'animation-delay:' + Math.min(i, 8) * 25 + 'ms' : 'animation: none'}">
+        <button class="check" role="checkbox" aria-checked="${t.completed}" aria-label="Mark ${esc(t.title)} as ${t.completed ? 'pending' : 'completed'}" data-act="toggle">${ICON.check}</button>
+        <div class="min-w-0 flex-1">
+          <div class="task-title">${esc(t.title)}</div>
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-2 mt-2">
+            <span class="chip" data-p="${esc(t.priority)}">${esc(t.priority)}</span>
+            <span class="chip">${esc(t.scope)}</span>
+            <span class="mono" style="color: var(--on-var);">${relTime(t.createdAt)}</span>
+            ${state.cached ? `<span class="mono cached" title="Served from Redis">${ICON.bolt}cached</span>` : ''}
           </div>
         </div>
-      `;
-    }).join('');
+        <div class="actions"><button class="iconbtn danger" aria-label="Delete ${esc(t.title)}" data-act="delete">${ICON.trash}</button></div>
+      </article>`).join('');
   }
+  const renderAll = (animate = true) => { renderScopes(); renderMetrics(); renderFeed(animate); };
+  function showSkeleton() { $('feed').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; }
 
-  function getTagStyle(tag) {
-    switch (tag) {
-      case 'DevOps': return 'bg-purple-50 text-purple-700 border border-purple-200';
-      case 'Docker': return 'bg-blue-50 text-blue-700 border border-blue-200';
-      case 'K8s': return 'bg-sky-50 text-sky-700 border border-sky-200';
-      case 'Database': return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
-      default: return 'bg-slate-100 text-slate-700 border border-slate-200';
+  /* ---------- Health ---------- */
+  function pick(obj, key) {
+    if (!obj || typeof obj !== 'object') return null;
+    for (const k of Object.keys(obj)) {
+      if (new RegExp(key, 'i').test(k)) {
+        const v = obj[k];
+        if (typeof v === 'number') return { ms: v };
+        if (typeof v === 'string') { const m = v.match(/[\d.]+/); return { ms: m ? parseFloat(m[0]) : null, text: v }; }
+        if (v && typeof v === 'object') return { ms: v.latency ?? v.latencyMs ?? v.ms ?? v.responseTime ?? null, ok: v.status ? /up|ok|connected|healthy/i.test(String(v.status)) : undefined };
+      }
+      if (obj[k] && typeof obj[k] === 'object') { const r = pick(obj[k], key); if (r) return r; }
     }
+    return null;
   }
-
-  function getPriorityStyle(p) {
-    switch (p) {
-      case 'high': return 'bg-rose-50 text-rose-700 border border-rose-200';
-      case 'low': return 'bg-slate-100 text-slate-600 border border-slate-200';
-      default: return 'bg-amber-50 text-amber-700 border border-amber-200';
+  function setStatus(dot, s) { $(dot).setAttribute('data-s', s); }
+  function applyHealth(h) {
+    if (h === null) {
+      setStatus('healthDot', 'idle'); setStatus('dotMongo', 'idle'); setStatus('dotRedis', 'idle'); setStatus('dotPods', 'idle');
+      $('healthText').textContent = 'Demo mode · API offline'; $('healthTextShort').textContent = 'Demo';
+      $('valMongo').textContent = '1ms'; $('valRedis').textContent = '0ms'; $('valPods').textContent = state.pods + '/10';
+      setHpa(state.pods); return;
     }
+    const mongo = pick(h, 'database|mongo'), redis = pick(h, 'redis'), pods = pick(h, 'pod|replica');
+    const mOk = mongo ? mongo.ok !== false : true, rOk = redis ? redis.ok !== false : true;
+    const fmt = (x) => x && x.ms != null ? (Math.round(x.ms * 10) / 10) + 'ms' : (x && x.text) || 'up';
+    $('valMongo').textContent = mongo ? fmt(mongo) : 'up'; $('valRedis').textContent = redis ? fmt(redis) : 'up';
+    if (pods && pods.ms != null) state.pods = Math.max(1, Math.min(10, Math.round(pods.ms)));
+    $('valPods').textContent = state.pods + '/10'; setHpa(state.pods);
+    setStatus('dotMongo', mOk ? 'ok' : 'down'); setStatus('dotRedis', rOk ? 'ok' : 'warn'); setStatus('dotPods', 'ok');
+    const sev = !mOk ? 'down' : !rOk ? 'warn' : 'ok';
+    setStatus('healthDot', sev);
+    const txt = !mOk ? 'MongoDB down' : !rOk ? 'Redis slow' : 'MongoDB ' + fmt(mongo || { ms: null }) + ' · Redis ' + fmt(redis || { ms: null });
+    $('healthText').textContent = txt; $('healthTextShort').textContent = sev === 'ok' ? 'Healthy' : sev === 'warn' ? 'Degraded' : 'Down';
+    $('healthText').style.color = sev === 'down' ? 'var(--err)' : '';
+  }
+  function setHpa(n) {
+    $('hpaSeg').innerHTML = Array.from({ length: 9 }, (_, i) => `<i class="${i + 2 <= n ? 'on' : ''}"></i>`).join('');
+    $('hpaNow').textContent = 'now ' + n;
+  }
+  async function pollHealth() {
+    try { const { data } = await api('/health', { timeout: 3000 }); state.demo = false; applyHealth(data || {}); return true; }
+    catch (e) { if (e.status) { setStatus('healthDot', 'down'); $('healthText').textContent = 'API error ' + e.status; return false; } state.demo = true; applyHealth(null); return false; }
   }
 
-  // Toggle Task Status
-  async function toggleTask(id, isCompleted) {
+  /* ---------- Session ---------- */
+  function initials(n) { return (n || 'U').trim().split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase(); }
+  function setUser(name, role) {
+    state.user = { name, role };
+    $('userChip').hidden = false; $('avatar').textContent = initials(name);
+    $('userName').textContent = name; $('userRole').textContent = role;
+  }
+  function jwtName(token) {
+    try { const p = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))); return p.name || p.username || p.email || p.sub || null; } catch { return null; }
+  }
+  function openAuth(open) { $('authScrim').hidden = !open; if (open) setTimeout(() => $('authId').focus(), 50); }
+  function signOut() {
+    store.del(CONFIG.tokenKey); store.del(CONFIG.userKey);
+    store.del('todo_access_token'); store.del('todo_user');
+    state.token = null; state.user = null; state.todos = []; $('userChip').hidden = true; renderAll(false);
+    if (state.demo) { startDemo(); } else { openAuth(true); }
+  }
+  function startDemo() {
+    state.token = null; state.cached = true; state.todos = demoSeed(); setUser('Aditya', 'demo tenant'); renderAll(true);
+  }
+
+  async function loadTodos() {
+    showSkeleton();
     try {
-      const res = await fetch(`${API_BASE}/todos/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isCompleted }),
-      });
-      const result = await res.json();
-      if (res.ok && result.success) {
-        const idx = allTodos.findIndex(t => t._id === id);
-        if (idx !== -1) {
-          allTodos[idx].isCompleted = isCompleted;
-          renderTasks();
-          showToast(isCompleted ? 'Task marked complete!' : 'Task reopened');
-        }
-      }
-    } catch (err) {
-      showToast('Failed to update task', true);
+      const { data, headers } = await api('/todos');
+      const arr = Array.isArray(data) ? data : (data && (data.todos || data.data || data.items)) || [];
+      state.todos = arr.map(norm);
+      state.cached = (headers.get('x-cache') || '').toUpperCase() === 'HIT' || !!(data && data.cached);
+      renderAll(true);
+    } catch (e) {
+      if (e.status === 401) { signOut(); return; }
+      state.todos = []; renderAll(false); toast('Could not load tasks. ' + e.message);
     }
   }
 
-  // Delete Task
-  async function deleteTask(id) {
+  /* ---------- Task actions ---------- */
+  async function addTask(title) {
+    const btn = $('addBtn'); btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span><span>Adding…</span>';
+    const body = { title, priority: state.priority.toLowerCase(), scope: $('scopeSelect').value };
     try {
-      const res = await fetch(`${API_BASE}/todos/${id}`, { method: 'DELETE' });
-      const result = await res.json();
-      if (res.ok && result.success) {
-        allTodos = allTodos.filter(t => t._id !== id);
-        renderTasks();
-        showToast('Task removed');
-      }
-    } catch (err) {
-      showToast('Failed to delete task', true);
-    }
+      let created;
+      if (state.demo) { created = { id: 'd' + Date.now(), ...body, completed: false, createdAt: Date.now() }; }
+      else { const { data } = await api('/todos', { method: 'POST', body }); created = norm((data && (data.todo || data.data)) || data || {}); if (!created.id) created = { ...created, id: 'n' + Date.now() }; if (!created.title) created.title = title; created.priority = created.priority || state.priority; }
+      state.todos.unshift(created); state.cached = false; $('taskInput').value = ''; renderAll(true); toast('Task added');
+    } catch (e) { if (e.status === 401) { signOut(); } else toast('Could not add task. ' + e.message); }
+    btn.disabled = false; btn.innerHTML = ICON_PLUS + '<span>Add task</span>';
+  }
+  const ICON_PLUS = '<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
+  async function toggleTask(id) {
+    const t = state.todos.find((x) => String(x.id) === String(id)); if (!t) return;
+    t.completed = !t.completed; renderAll(false);
+    if (state.demo) return;
+    try { await api('/todos/' + encodeURIComponent(id), { method: 'PATCH', body: { completed: t.completed, isCompleted: t.completed } }); }
+    catch (e) { t.completed = !t.completed; renderAll(false); toast('Could not update task. ' + e.message); }
+  }
+  let pendingDelete;
+  function deleteTask(id) {
+    const idx = state.todos.findIndex((x) => String(x.id) === String(id)); if (idx < 0) return;
+    if (pendingDelete) pendingDelete.commit();
+    const [removed] = state.todos.splice(idx, 1); renderAll(false);
+    let undone = false;
+    const commit = async () => {
+      clearTimeout(pendingDelete && pendingDelete.timer); pendingDelete = null;
+      if (undone || state.demo) return;
+      try { await api('/todos/' + encodeURIComponent(removed.id), { method: 'DELETE' }); } catch (e) { state.todos.splice(idx, 0, removed); renderAll(false); toast('Could not delete task. ' + e.message); }
+    };
+    pendingDelete = { commit, timer: setTimeout(commit, 5000) };
+    toast('Task deleted', () => { undone = true; clearTimeout(pendingDelete && pendingDelete.timer); pendingDelete = null; state.todos.splice(idx, 0, removed); renderAll(false); });
   }
 
-  // Filter Handling
-  function filterTasks(type) {
-    currentFilter = type;
-    ['all', 'active', 'completed'].forEach(t => {
-      const el = document.getElementById(`filter-${t}`);
-      if (t === type) {
-        el.className = "filter-tab px-4 py-1.5 rounded-full text-white bg-blue-600 shadow-sm transition";
-      } else {
-        el.className = "filter-tab px-4 py-1.5 rounded-full text-slate-600 hover:text-slate-900 transition";
-      }
+  /* ---------- Auth form ---------- */
+  function setMode(mode) {
+    state.mode = mode; const up = mode === 'register';
+    $('tabIn').setAttribute('aria-selected', String(!up)); $('tabUp').setAttribute('aria-selected', String(up));
+    $('tabInk').style.transform = up ? 'translateX(100%)' : 'none';
+    $('nameRow').hidden = !up; $('pwHint').hidden = !up; $('authErr').hidden = true;
+    $('authBtn').firstElementChild.textContent = up ? 'Create account' : 'Sign in';
+    $('authPw').autocomplete = up ? 'new-password' : 'current-password';
+  }
+  async function submitAuth(ev) {
+    ev.preventDefault();
+    const id = $('authId').value.trim(), pw = $('authPw').value, name = $('authName').value.trim();
+    const btn = $('authBtn'); const label = btn.firstElementChild.textContent;
+    btn.disabled = true; btn.innerHTML = '<span class="spin"></span>'; $('authErr').hidden = true;
+    try {
+      const path = state.mode === 'register' ? '/auth/register' : '/auth/login';
+      const body = state.mode === 'register' ? { name: name || id, username: id, email: id.includes('@') ? id : undefined, password: pw } : { username: id, email: id.includes('@') ? id : undefined, password: pw };
+      const { data } = await api(path, { method: 'POST', body });
+      const token = data && (data.token || data.accessToken || data.access_token || (data.data && (data.data.accessToken || data.data.token)));
+      if (!token) throw new Error('The server did not return a session token.');
+      state.token = token;
+      store.set(CONFIG.tokenKey, token);
+      store.set('todo_access_token', token);
+      const display = (data.user && (data.user.name || data.user.username)) || (data.data && data.data.user && data.data.user.name) || name || jwtName(token) || id;
+      store.set(CONFIG.userKey, display);
+      store.set('todo_user', JSON.stringify({ name: display, email: id }));
+      setUser(display, (data.user && data.user.role) || (data.data && data.data.user && data.data.user.role) || 'tenant');
+      openAuth(false); $('authForm').reset(); await loadTodos();
+    } catch (e) {
+      $('authErr').textContent = e.name === 'AbortError' ? 'The server took too long to respond. Try again.' : e.message; $('authErr').hidden = false;
+    }
+    btn.disabled = false; btn.innerHTML = '<span>' + label + '</span>';
+  }
+
+  /* ---------- Wiring ---------- */
+  function wire() {
+    $('lnkDocs').href = CONFIG.docsUrl; $('lnkProm').href = CONFIG.metricsUrl; $('lnkTopo').href = CONFIG.topologyUrl; $('lnkAudit').href = CONFIG.auditUrl;
+    $('scopeSelect').innerHTML = SCOPES.map((s) => `<option value="${s}">${s}</option>`).join('');
+    const pickScope = (e) => { const b = e.target.closest('[data-scope]'); if (!b) return; state.scope = b.dataset.scope; renderScopes(); renderFeed(true); closeDrawer(); };
+    $('scopeList').addEventListener('click', pickScope); $('chipsRow').addEventListener('click', pickScope);
+    $('prioGroup').addEventListener('click', (e) => { const b = e.target.closest('button'); if (!b) return; state.priority = b.dataset.p; [...$('prioGroup').children].forEach((x) => x.setAttribute('aria-pressed', String(x === b))); });
+    $('taskForm').addEventListener('submit', (e) => { e.preventDefault(); const v = $('taskInput').value.trim(); if (v) addTask(v); });
+    $('feed').addEventListener('click', (e) => {
+      if (e.target.closest('#focusInput')) { $('taskInput').focus(); return; }
+      const b = e.target.closest('[data-act]'); if (!b) return; const id = b.closest('.task').dataset.id;
+      b.dataset.act === 'toggle' ? toggleTask(id) : deleteTask(id);
     });
-    renderTasks();
+    $('signOut').addEventListener('click', signOut);
+    $('tabIn').addEventListener('click', () => setMode('login')); $('tabUp').addEventListener('click', () => setMode('register'));
+    $('authForm').addEventListener('submit', submitAuth);
+    $('pwToggle').addEventListener('click', () => { const show = $('authPw').type === 'password'; $('authPw').type = show ? 'text' : 'password'; $('pwToggle').innerHTML = show ? ICON.eyeOff : ICON.eye; $('pwToggle').setAttribute('aria-label', show ? 'Hide password' : 'Show password'); });
+    const openDrawer = () => { $('sidebar').classList.add('open'); $('drawerScrim').hidden = false; };
+    function closeDrawer() { $('sidebar').classList.remove('open'); $('drawerScrim').hidden = true; }
+    $('menuBtn').addEventListener('click', openDrawer); $('drawerScrim').addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { if (!$('authScrim').hidden && state.token) openAuth(false); closeDrawer(); } });
+    window.closeDrawer = closeDrawer;
   }
+  function closeDrawer() { window.closeDrawer && window.closeDrawer(); }
 
-  // Scope Pill Selection
-  document.querySelectorAll('.scope-pill').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.scope-pill').forEach(b => {
-        b.className = "scope-pill px-3 py-1 text-xs rounded-full bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition font-medium";
-      });
-      btn.className = "scope-pill px-3 py-1 text-xs rounded-full bg-slate-900 text-white border border-transparent font-medium shadow-sm transition";
-      selectedScope = btn.getAttribute('data-tag');
-    });
-  });
-
-  // Create Task
-  document.getElementById('create-task-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-
-    const titleInput = document.getElementById('task-title-input');
-    const detailsInput = document.getElementById('task-details-input');
-    const submitBtn = document.getElementById('submit-btn');
-    const submitText = document.getElementById('submit-btn-text');
-
-    const title = titleInput.value.trim();
-    const details = detailsInput.value.trim();
-
-    if (!title) return;
-
-    submitBtn.disabled = true;
-    submitText.textContent = "Adding...";
-    const payloadDesc = details ? `[${selectedScope}] ${details}` : `[${selectedScope}]`;
-
-    try {
-      const res = await fetch(`${API_BASE}/todos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title,
-          description: payloadDesc,
-          priority: selectedScope === 'DevOps' ? 'high' : 'medium'
-        }),
-      });
-
-      const result = await res.json();
-      if (res.ok && result.success) {
-        allTodos.unshift(result.data);
-        titleInput.value = '';
-        detailsInput.value = '';
-        renderTasks();
-        showToast('Task created successfully!');
-      } else {
-        throw new Error(result.error?.message || 'Could not add task');
-      }
-    } catch (err) {
-      showToast(err.message, true);
-    } finally {
-      submitBtn.disabled = false;
-      submitText.textContent = "Add Task";
-    }
-  });
-
-  function escapeHtml(str) {
-    const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-    return str.replace(/[&<>"']/g, m => map[m]);
+  /* ---------- Boot ---------- */
+  async function boot() {
+    wire(); setHpa(state.pods); renderScopes(); showSkeleton();
+    const online = await pollHealth();
+    setInterval(pollHealth, CONFIG.healthEveryMs);
+    if (!online && state.demo) { startDemo(); return; }
+    const token = store.get(CONFIG.tokenKey) || store.get('todo_access_token');
+    if (token) {
+      state.token = token; setUser(store.get(CONFIG.userKey) || jwtName(token) || 'User', 'tenant'); await loadTodos();
+    } else { renderAll(false); openAuth(true); }
   }
-
-  // Initialize
-  checkHealth();
-  loadTodos();
-  setInterval(checkHealth, 8000);
+  boot();
+})();
 </script>
 </body>
 </html>

@@ -30,6 +30,11 @@ const todoSchema = new mongoose.Schema(
       enum: ['low', 'medium', 'high'],
       default: 'medium',
     },
+    scope: {
+      type: String,
+      default: 'DevOps',
+      trim: true,
+    },
     dueDate: {
       type: Date,
       default: null,
