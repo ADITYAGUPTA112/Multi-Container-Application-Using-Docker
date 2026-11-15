@@ -1,345 +1,789 @@
 <!DOCTYPE html>
+<html lang="en" style="--mouse-x: 50%; --mouse-y: 50%;">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Authentication Portal | Multi-Container Enterprise Platform</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 
-<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_blank" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        "colors": {
-          "surface-bright": "#f9f9fd",
-          "error": "#ba1a1a",
-          "tertiary-container": "#fef9f6",
-          "secondary": "#5f5e5e",
-          "inverse-on-surface": "#f0f0f4",
-          "on-tertiary-container": "#757270",
-          "on-error-container": "#93000a",
-          "outline-variant": "#c4c7c9",
-          "on-primary": "#ffffff",
-          "tertiary-fixed": "#e6e2df",
-          "surface": "#f9f9fd",
-          "error-container": "#ffdad6",
-          "inverse-primary": "#c6c6c7",
-          "on-secondary": "#ffffff",
-          "surface-dim": "#d9dadd",
-          "outline": "#747779",
-          "on-error": "#ffffff",
-          "secondary-fixed": "#e5e2e1",
-          "on-secondary-fixed-variant": "#474646",
-          "inverse-surface": "#2e3033",
-          "on-background": "#1a1c1f",
-          "on-tertiary": "#ffffff",
-          "surface-container-lowest": "#ffffff",
-          "on-primary-fixed": "#1a1c1d",
-          "tertiary-fixed-dim": "#cac6c3",
-          "on-secondary-container": "#656464",
-          "surface-container-highest": "#e2e2e6",
-          "on-primary-fixed-variant": "#454748",
-          "surface-container": "#ededf1",
-          "primary-fixed-dim": "#c6c6c7",
-          "background": "#f9f9fd",
-          "primary-fixed": "#e2e2e3",
-          "on-surface-variant": "#444749",
-          "on-tertiary-fixed": "#1c1b1a",
-          "on-primary-container": "#717374",
-          "primary-container": "#fafafb",
-          "surface-variant": "#e2e2e6",
-          "on-tertiary-fixed-variant": "#484644",
-          "surface-container-high": "#e8e8ec",
-          "surface-tint": "#5d5e60",
-          "primary": "#5d5e60",
-          "secondary-fixed-dim": "#c9c6c5",
-          "tertiary": "#605e5c",
-          "secondary-container": "#e5e2e1",
-          "on-surface": "#1a1c1f",
-          "on-secondary-fixed": "#1c1b1b",
-          "surface-container-low": "#f3f3f7"
+  <style>
+    @layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
+    }
+    ::-webkit-scrollbar { display: none; }
+
+    /* Dynamic Multicolor Aura & Ambient Flow Styles */
+    :root {
+      --mouse-x: 50%;
+      --mouse-y: 50%;
+    }
+
+    @keyframes floatBlob1 {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(60px, -40px) scale(1.15); }
+      66% { transform: translate(-40px, 50px) scale(0.9); }
+    }
+
+    @keyframes floatBlob2 {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      33% { transform: translate(-70px, 50px) scale(1.1); }
+      66% { transform: translate(50px, -30px) scale(0.95); }
+    }
+
+    @keyframes floatBlob3 {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      50% { transform: translate(50px, 60px) scale(1.2); }
+    }
+
+    @keyframes floatBlob4 {
+      0%, 100% { transform: translate(0px, 0px) scale(1); }
+      50% { transform: translate(-60px, -50px) scale(1.15); }
+    }
+
+    .animate-blob-1 { animation: floatBlob1 14s ease-in-out infinite alternate; }
+    .animate-blob-2 { animation: floatBlob2 18s ease-in-out infinite alternate; }
+    .animate-blob-3 { animation: floatBlob3 16s ease-in-out infinite alternate; }
+    .animate-blob-4 { animation: floatBlob4 20s ease-in-out infinite alternate; }
+
+    .interactive-cursor-glow {
+      background: radial-gradient(
+        650px circle at var(--mouse-x) var(--mouse-y),
+        rgba(6, 182, 212, 0.45) 0%,
+        rgba(168, 85, 247, 0.38) 28%,
+        rgba(244, 63, 94, 0.30) 48%,
+        rgba(245, 158, 11, 0.22) 65%,
+        transparent 80%
+      );
+      transition: opacity 0.3s ease;
+    }
+
+    /* Click Shockwave Ring Animation */
+    @keyframes sparkRipple {
+      0% {
+        transform: translate(-50%, -50%) scale(0.2);
+        opacity: 0.95;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(3.2);
+        opacity: 0;
+      }
+    }
+
+    .spark-shockwave {
+      position: fixed;
+      border-radius: 9999px;
+      pointer-events: none;
+      z-index: 60;
+      width: 90px;
+      height: 90px;
+      border: 2px solid rgba(6, 182, 212, 0.75);
+      box-shadow: 0 0 24px 5px rgba(236, 72, 153, 0.5), inset 0 0 16px rgba(6, 182, 212, 0.4);
+      animation: sparkRipple 0.65s cubic-bezier(0.12, 0.8, 0.32, 1) forwards;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .animate-blob-1, .animate-blob-2, .animate-blob-3, .animate-blob-4, .spark-shockwave {
+        animation: none !important;
+      }
+    }
+  </style>
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-bright": "#f9f9fd",
+            "error": "#ba1a1a",
+            "tertiary-container": "#fef9f6",
+            "secondary": "#5f5e5e",
+            "inverse-on-surface": "#f0f0f4",
+            "on-tertiary-container": "#757270",
+            "on-error-container": "#93000a",
+            "outline-variant": "#c4c7c9",
+            "on-primary": "#ffffff",
+            "tertiary-fixed": "#e6e2df",
+            "surface": "#f9f9fd",
+            "error-container": "#ffdad6",
+            "inverse-primary": "#c6c6c7",
+            "on-secondary": "#ffffff",
+            "surface-dim": "#d9dadd",
+            "outline": "#747779",
+            "on-error": "#ffffff",
+            "secondary-fixed": "#e5e2e1",
+            "on-secondary-fixed-variant": "#474646",
+            "inverse-surface": "#2e3033",
+            "on-background": "#1a1c1f",
+            "on-tertiary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "on-primary-fixed": "#1a1c1d",
+            "tertiary-fixed-dim": "#cac6c3",
+            "on-secondary-container": "#656464",
+            "surface-container-highest": "#e2e2e6",
+            "on-primary-fixed-variant": "#454748",
+            "surface-container": "#ededf1",
+            "primary-fixed-dim": "#c6c6c7",
+            "background": "#f9f9fd",
+            "primary-fixed": "#e2e2e3",
+            "on-surface-variant": "#444749",
+            "on-tertiary-fixed": "#1c1b1a",
+            "on-primary-container": "#717374",
+            "primary-container": "#fafafb",
+            "surface-variant": "#e2e2e6",
+            "on-tertiary-fixed-variant": "#484644",
+            "surface-container-high": "#e8e8ec",
+            "surface-tint": "#5d5e60",
+            "primary": "#5d5e60",
+            "secondary-fixed-dim": "#c9c6c5",
+            "tertiary": "#605e5c",
+            "secondary-container": "#e5e2e1",
+            "on-surface": "#1a1c1f",
+            "on-secondary-fixed": "#1c1b1b",
+            "surface-container-low": "#f3f3f7"
+          },
+          "borderRadius": {
+            "DEFAULT": "1rem",
+            "lg": "2rem",
+            "xl": "3rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "margin": "2rem",
+            "gutter": "1.5rem",
+            "space-sm": "0.5rem",
+            "space-lg": "1.5rem",
+            "space-md": "1rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2.5rem"
+          },
+          "fontFamily": {
+            "body-md": ["Arimo"],
+            "headline-lg": ["Be Vietnam Pro"],
+            "label-sm": ["Inter"]
+          },
+          "fontSize": {
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+            "label-sm": ["12px", { "lineHeight": "16px", "fontWeight": "500" }]
+          }
         },
-        "borderRadius": {
-          "DEFAULT": "1rem",
-          "lg": "2rem",
-          "xl": "3rem",
-          "full": "9999px"
-        },
-        "spacing": {
-          "margin": "2rem",
-          "gutter": "1.5rem",
-          "space-sm": "0.5rem",
-          "space-lg": "1.5rem",
-          "space-md": "1rem",
-          "space-xs": "0.25rem",
-          "space-xl": "2.5rem"
-        },
-        "fontFamily": {
-          "body-md": [
-            "Arimo"
-          ],
-          "headline-lg": [
-            "Be Vietnam Pro"
-          ],
-          "label-sm": [
-            "Inter"
-          ]
-        },
-        "fontSize": {
-          "body-md": [
-            "16px",
-            {
-              "lineHeight": "24px",
-              "fontWeight": "400"
-            }
-          ],
-          "headline-lg": [
-            "32px",
-            {
-              "lineHeight": "40px",
-              "fontWeight": "600"
-            }
-          ],
-          "label-sm": [
-            "12px",
-            {
-              "lineHeight": "16px",
-              "fontWeight": "500"
-            }
-          ]
-        }
       },
-    },
-  }</script></head><body class="bg-surface font-body-md text-on-surface"><main class="min-h-screen w-full flex items-center justify-center p-margin"><div class="flex flex-col w-full items-center justify-center relative py-space-xl">
-<!-- Subtle Ambient Background Cluster Mesh -->
-<div class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden opacity-40">
-<svg class="w-full max-w-5xl h-auto text-outline-variant" fill="none" viewbox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<pattern height="40" id="grid-pattern" patternunits="userSpaceOnUse" width="40">
-<circle cx="2" cy="2" fill="currentColor" fill-opacity="0.3" r="1.5"></circle>
-<path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-opacity="0.2" stroke-width="0.5"></path>
-</pattern>
-</defs>
-<rect fill="url(#grid-pattern)" height="100%" width="100%"></rect>
-<!-- Abstract Cluster Nodes -->
-<g stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.4" stroke-width="1.2">
-<line x1="200" x2="400" y1="180" y2="120"></line>
-<line x1="400" x2="620" y1="120" y2="200"></line>
-<line x1="400" x2="400" y1="120" y2="340"></line>
-<line x1="200" x2="260" y1="180" y2="400"></line>
-<line x1="620" x2="540" y1="200" y2="410"></line>
-</g>
-<circle class="text-primary" cx="200" cy="180" fill="currentColor" r="6"></circle>
-<circle class="text-primary" cx="400" cy="120" fill="currentColor" r="8"></circle>
-<circle class="text-primary" cx="620" cy="200" fill="currentColor" r="6"></circle>
-<circle class="text-secondary" cx="400" cy="340" fill="currentColor" r="5"></circle>
-<circle class="text-outline" cx="260" cy="400" fill="currentColor" r="4"></circle>
-<circle class="text-outline" cx="540" cy="410" fill="currentColor" r="4"></circle>
-</svg>
-</div>
-<!-- Security Protocol Notification Banner -->
-<div class="relative z-10 w-full max-w-md mb-space-md">
-<div class="bg-tertiary-container shadow-sm rounded-2xl p-space-sm px-space-md flex items-start gap-space-sm">
-<span class="material-symbols-outlined text-secondary text-[18px] mt-0.5" style="font-variation-settings: 'FILL' 1;">verified_user</span>
-<div class="flex-1 min-w-0">
-<p class="font-label-sm text-label-sm text-on-surface leading-tight font-medium">
-          JWT Bearer Session Active
-        </p>
-<p class="font-label-sm text-[11px] text-on-surface-variant leading-relaxed mt-0.5 truncate">
-          Local auth initialized via <span class="font-semibold text-on-surface">/auth/login</span> over Nginx reverse proxy (:80).
-        </p>
-</div>
-<div class="flex items-center gap-1.5 self-center bg-surface-container-high px-2 py-0.5 rounded-full">
-<span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-<span class="font-label-sm text-[10px] text-on-surface-variant uppercase tracking-wider font-semibold">TLS 1.3</span>
-</div>
-</div>
-</div>
-<!-- Central Authentication Card -->
-<div class="relative z-10 w-full max-w-md bg-surface-container-lowest shadow-xl rounded-xl p-8 flex flex-col">
-<!-- Header Branding -->
-<div class="flex flex-col items-center text-center">
-<div class="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center shadow-inner mb-space-sm">
-<span class="material-symbols-outlined text-on-surface text-2xl" style="font-variation-settings: 'FILL' 1;">view_in_ar</span>
-</div>
-<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
-        Multi-Container Platform
-      </h1>
-<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">
-        Secure Infrastructure Orchestration &amp; Workload Manager
-      </p>
-</div>
-<!-- Mode Selector: Segmented Pill Tab Switcher -->
-<div class="w-full bg-surface-container-high p-1 rounded-full flex items-center mt-space-lg mb-space-lg">
-<button class="flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5" id="tab-signin" onclick="switchAuthMode('signin')" type="button">
-<span class="material-symbols-outlined text-[16px]">login</span>
-<span>Sign In</span>
-</button>
-<button class="flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5" id="tab-signup" onclick="switchAuthMode('signup')" type="button">
-<span class="material-symbols-outlined text-[16px]">person_add</span>
-<span>Register Tenant</span>
-</button>
-</div>
-<!-- SIGN IN FORM -->
-<form class="flex flex-col gap-space-md" id="form-signin" onsubmit="event.preventDefault(); simulateAuth();">
-<div class="flex flex-col gap-1.5">
-<label class="font-label-sm text-label-sm text-on-surface font-medium flex items-center justify-between" for="signin-email">
-<span>DevOps Identity</span>
-<span class="text-on-surface-variant text-[11px]">LDAP / SSO Enabled</span>
-</label>
-<div class="relative flex items-center">
-<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">alternate_email</span>
-<input class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signin-email" name="email" placeholder="devops.engineer@cluster.internal" required="" type="email" value="devops.engineer@cluster.internal"/>
-</div>
-</div>
-<div class="flex flex-col gap-1.5">
-<div class="flex items-center justify-between">
-<label class="font-label-sm text-label-sm text-on-surface font-medium" for="signin-password">
-            Security Key / Token
-          </label>
-<a class="font-label-sm text-[11px] text-on-surface-variant hover:text-on-surface underline" href="#">
-            Rotate Key?
-          </a>
-</div>
-<div class="relative flex items-center">
-<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">key</span>
-<input class="w-full pl-10 pr-11 py-2.5 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors tracking-widest" id="signin-password" name="password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required="" type="password" value="k8s_secret_jwt_node92"/>
-<button aria-label="Toggle Password Visibility" class="absolute right-3.5 text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center p-1 rounded-full focus:outline-none" onclick="togglePasswordVisibility('signin-password', this)" type="button">
-<span class="material-symbols-outlined text-[18px]">visibility</span>
-</button>
-</div>
-</div>
-<!-- Remember JWT Session -->
-<div class="flex items-center justify-between pt-1">
-<label class="flex items-center gap-2.5 cursor-pointer select-none">
-<input checked="" class="w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" id="remember-token" type="checkbox"/>
-<span class="font-label-sm text-label-sm text-on-surface-variant">
-            Remember session token (30-day JWT)
-          </span>
-</label>
-</div>
-<!-- Primary Submit CTA -->
-<button class="w-full mt-2 py-3 px-6 rounded-full bg-primary hover:bg-secondary text-on-primary font-label-sm text-body-md font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md" id="btn-submit" type="submit">
-<span>Sign In to Orchestrator</span>
-<span class="material-symbols-outlined text-[20px]">terminal</span>
-</button>
-</form>
-<!-- SIGN UP FORM (Initially Hidden) -->
-<form class="hidden flex flex-col gap-space-sm" id="form-signup" onsubmit="event.preventDefault(); simulateAuth();">
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-name">Full Name</label>
-<div class="relative flex items-center">
-<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">badge</span>
-<input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-name" placeholder="Alex Mercer" type="text"/>
-</div>
-</div>
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface font-medium flex items-center justify-between" for="signup-tenant">
-<span>Cluster Tenant / Namespace</span>
-<span class="text-on-surface-variant text-[11px]">Isolated Pod</span>
-</label>
-<div class="relative flex items-center">
-<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">domain</span>
-<input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-tenant" placeholder="Platform Engineering" type="text"/>
-</div>
-</div>
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-email">Work Email</label>
-<div class="relative flex items-center">
-<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">mail</span>
-<input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-email" placeholder="alex.m@cluster.internal" type="email"/>
-</div>
-</div>
-<div class="flex flex-col gap-1">
-<label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-password">Master Password</label>
-<div class="relative flex items-center">
-<span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">lock</span>
-<input class="w-full pl-10 pr-11 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors tracking-widest" id="signup-password" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" type="password"/>
-<button class="absolute right-3.5 text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center p-1 rounded-full focus:outline-none" onclick="togglePasswordVisibility('signup-password', this)" type="button">
-<span class="material-symbols-outlined text-[18px]">visibility</span>
-</button>
-</div>
-</div>
-<button class="w-full mt-3 py-3 px-6 rounded-full bg-primary hover:bg-secondary text-on-primary font-label-sm text-body-md font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md" type="submit">
-<span>Provision Tenant Node</span>
-<span class="material-symbols-outlined text-[20px]">cloud_queue</span>
-</button>
-</form>
-<!-- Micro Cluster Telemetry Status -->
-<div class="mt-space-lg pt-space-md bg-surface-container-low rounded-2xl p-space-sm flex flex-col gap-2">
-<div class="flex items-center justify-between font-label-sm text-[11px] text-on-surface-variant px-1">
-<span class="flex items-center gap-1.5 font-medium">
-<span class="w-2 h-2 rounded-full bg-primary"></span>
-          Cluster Gateway :80
+    }
+  </script>
+</head>
+
+<body class="bg-surface font-body-md text-on-surface overflow-x-hidden selection:bg-cyan-500/20">
+  <main class="min-h-screen w-full flex items-center justify-center p-margin relative overflow-hidden">
+    <div class="flex flex-col w-full items-center justify-center relative py-space-xl z-10">
+
+      <!-- BRIGHT MULTICOLOR INTERACTIVE BACKGROUND SYSTEM -->
+      <div aria-hidden="true" class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <!-- Base Radiant Underlay -->
+        <div class="absolute inset-0 bg-gradient-to-tr from-cyan-100/60 via-amber-50/70 to-fuchsia-100/60"></div>
+        <!-- Ambient Bright Floating Multicolor Orbs -->
+        <div class="absolute -top-24 -left-20 w-[550px] h-[550px] bg-gradient-to-br from-cyan-400/50 via-teal-300/40 to-blue-500/45 rounded-full blur-[100px] animate-blob-1 mix-blend-multiply"></div>
+        <div class="absolute top-1/4 -right-28 w-[600px] h-[600px] bg-gradient-to-bl from-fuchsia-500/50 via-pink-400/45 to-purple-600/40 rounded-full blur-[115px] animate-blob-2 mix-blend-multiply"></div>
+        <div class="absolute -bottom-24 left-1/4 w-[580px] h-[580px] bg-gradient-to-tr from-amber-400/50 via-orange-400/45 to-yellow-300/45 rounded-full blur-[110px] animate-blob-3 mix-blend-multiply"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-gradient-to-r from-emerald-400/40 via-lime-300/35 to-teal-400/40 rounded-full blur-[125px] animate-blob-4 mix-blend-multiply"></div>
+        <!-- Interactive Dynamic Mouse Tracking Multi-color Spotlight -->
+        <div class="absolute inset-0 interactive-cursor-glow pointer-events-none mix-blend-multiply"></div>
+        <div class="absolute inset-0 interactive-cursor-glow pointer-events-none opacity-60 filter blur-xl"></div>
+      </div>
+
+      <!-- Subtle Ambient Background Cluster Mesh -->
+      <div class="absolute inset-0 pointer-events-none flex items-center justify-center overflow-hidden opacity-30 z-0">
+        <svg class="w-full max-w-5xl h-auto text-outline-variant" fill="none" viewbox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern height="40" id="grid-pattern" patternunits="userSpaceOnUse" width="40">
+              <circle cx="2" cy="2" fill="currentColor" fill-opacity="0.35" r="1.5"></circle>
+              <path d="M 40 0 L 0 0 0 40" fill="none" stroke="currentColor" stroke-opacity="0.25" stroke-width="0.5"></path>
+            </pattern>
+          </defs>
+          <rect fill="url(#grid-pattern)" height="100%" width="100%"></rect>
+          <!-- Abstract Cluster Nodes -->
+          <g stroke="currentColor" stroke-dasharray="4 4" stroke-opacity="0.5" stroke-width="1.2">
+            <line x1="200" x2="400" y1="180" y2="120"></line>
+            <line x1="400" x2="620" y1="120" y2="200"></line>
+            <line x1="400" x2="400" y1="120" y2="340"></line>
+            <line x1="200" x2="260" y1="180" y2="400"></line>
+            <line x1="620" x2="540" y1="200" y2="410"></line>
+          </g>
+          <circle class="text-primary" cx="200" cy="180" fill="currentColor" r="6"></circle>
+          <circle class="text-primary" cx="400" cy="120" fill="currentColor" r="8"></circle>
+          <circle class="text-primary" cx="620" cy="200" fill="currentColor" r="6"></circle>
+          <circle class="text-secondary" cx="400" cy="340" fill="currentColor" r="5"></circle>
+          <circle class="text-outline" cx="260" cy="400" fill="currentColor" r="4"></circle>
+          <circle class="text-outline" cx="540" cy="410" fill="currentColor" r="4"></circle>
+        </svg>
+      </div>
+
+      <!-- Navigation Top Bar -->
+      <div class="relative z-10 w-full max-w-md flex items-center justify-between mb-3 px-2">
+        <a href="/index.html" class="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface bg-white/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-black/[0.06] transition shadow-sm">
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+          <span>Operations Dashboard</span>
+        </a>
+        <div id="active-session-pill" class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-emerald-300 shadow-sm">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="active-user-name">Authenticated</span>
+        </div>
+      </div>
+
+      <!-- Central Authentication Card -->
+      <div class="relative z-10 w-full max-w-md bg-surface-container-lowest/95 backdrop-blur-xl shadow-2xl ring-1 ring-black/[0.04] rounded-xl p-8 flex flex-col transition-shadow">
+        
+        <!-- Header Branding -->
+        <div class="flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-2xl bg-surface-container flex items-center justify-center shadow-inner mb-space-sm">
+            <span class="material-symbols-outlined text-on-surface text-2xl" style='font-variation-settings: "FILL" 1;'>view_in_ar</span>
+          </div>
+          <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Multi-Container Platform
+          </h1>
+          <p class="font-label-sm text-label-sm text-on-surface-variant mt-1">
+            Secure Infrastructure Orchestration &amp; Workload Manager
+          </p>
+        </div>
+
+        <!-- Mode Selector: Segmented Pill Tab Switcher -->
+        <div class="w-full bg-surface-container-high p-1 rounded-full flex items-center mt-space-lg mb-space-md">
+          <button class="flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5" id="tab-signin" onclick="switchAuthMode('signin')" type="button">
+            <span class="material-symbols-outlined text-[16px]">login</span>
+            <span>Sign In</span>
+          </button>
+          <button class="flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5" id="tab-signup" onclick="switchAuthMode('signup')" type="button">
+            <span class="material-symbols-outlined text-[16px]">person_add</span>
+            <span>Register Tenant</span>
+          </button>
+        </div>
+
+        <!-- Alert Notification Box -->
+        <div id="auth-alert" class="hidden mb-4 p-3 rounded-2xl text-xs font-medium flex items-center gap-2 transition-all duration-300">
+          <span id="auth-alert-icon" class="material-symbols-outlined text-[18px]"></span>
+          <span id="auth-alert-text"></span>
+        </div>
+
+        <!-- SIGN IN FORM -->
+        <form class="flex flex-col gap-space-md" id="form-signin" onsubmit="handleSignIn(event)">
+          <div class="flex flex-col gap-1.5">
+            <label class="font-label-sm text-label-sm text-on-surface font-medium flex items-center justify-between" for="signin-email">
+              <span>DevOps Identity</span>
+              <span class="text-on-surface-variant text-[11px]">JWT / SSO Protected</span>
+            </label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">alternate_email</span>
+              <input class="w-full pl-10 pr-4 py-2.5 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signin-email" name="email" placeholder="devops.engineer@cluster.internal" required="" type="email" value=""/>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center justify-between">
+              <label class="font-label-sm text-label-sm text-on-surface font-medium" for="signin-password">Password</label>
+              <span class="font-label-sm text-[11px] text-on-surface-variant">Min. 6 chars</span>
+            </div>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">key</span>
+              <input class="w-full pl-10 pr-11 py-2.5 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors tracking-widest" id="signin-password" name="password" placeholder="••••••••••••" required="" type="password" value=""/>
+              <button aria-label="Toggle Password Visibility" class="absolute right-3.5 text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center p-1 rounded-full focus:outline-none" onclick="togglePasswordVisibility('signin-password', this)" type="button">
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember JWT Session -->
+          <div class="flex items-center justify-between pt-1">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none">
+              <input checked="" class="w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer accent-primary" id="remember-token" type="checkbox"/>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">
+                Remember session token (JWT Auth)
+              </span>
+            </label>
+          </div>
+
+          <!-- Primary Submit CTA -->
+          <button class="w-full mt-2 py-3 px-6 rounded-full bg-primary hover:bg-secondary text-on-primary font-label-sm text-body-md font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]" id="btn-signin" type="submit">
+            <span>Sign In</span>
+            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+          </button>
+        </form>
+
+        <!-- SIGN UP FORM (Initially Hidden) -->
+        <form class="flex flex-col gap-space-sm hidden" id="form-signup" onsubmit="handleSignUp(event)">
+          <div class="flex flex-col gap-1">
+            <label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-name">Full Name</label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">badge</span>
+              <input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-name" placeholder="Aditya Gupta" required="" type="text"/>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="font-label-sm text-label-sm text-on-surface font-medium flex items-center justify-between" for="signup-tenant">
+              <span>Cluster Tenant / Role</span>
+              <span class="text-on-surface-variant text-[11px]">RBAC Isolated</span>
+            </label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">domain</span>
+              <input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-tenant" placeholder="Platform Engineering" type="text" value="Platform Engineering"/>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-email">Work Email</label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">mail</span>
+              <input class="w-full pl-10 pr-4 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors" id="signup-email" placeholder="aditya@cluster.internal" required="" type="email"/>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="font-label-sm text-label-sm text-on-surface font-medium" for="signup-password">Master Password</label>
+            <div class="relative flex items-center">
+              <span class="material-symbols-outlined absolute left-3.5 text-on-surface-variant text-[18px]">lock</span>
+              <input class="w-full pl-10 pr-11 py-2 rounded-full bg-surface-container font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low transition-colors tracking-widest" id="signup-password" placeholder="••••••••••••" required="" type="password"/>
+              <button aria-label="Toggle Password Visibility" class="absolute right-3.5 text-on-surface-variant hover:text-on-surface transition-colors flex items-center justify-center p-1 rounded-full focus:outline-none" onclick="togglePasswordVisibility('signup-password', this)" type="button">
+                <span class="material-symbols-outlined text-[18px]">visibility</span>
+              </button>
+            </div>
+          </div>
+
+          <button class="w-full mt-3 py-3 px-6 rounded-full bg-primary hover:bg-secondary text-on-primary font-label-sm text-body-md font-semibold transition-all duration-200 flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-[0.99]" id="btn-signup" type="submit">
+            <span>Register Tenant</span>
+            <span class="material-symbols-outlined text-[20px]">cloud_queue</span>
+          </button>
+        </form>
+
+        <!-- Micro Cluster Telemetry Status -->
+        <div class="mt-space-lg pt-space-md bg-surface-container-low/80 rounded-2xl p-space-sm flex flex-col gap-2">
+          <div class="flex items-center justify-between text-[11px] text-on-surface-variant font-mono">
+            <span>Mesh Security: TLS / AES-256</span>
+            <span id="gateway-ping">Gateway: Online</span>
+          </div>
+          <div class="w-full bg-surface-container-highest h-1.5 rounded-full overflow-hidden flex">
+            <div class="bg-primary h-full w-1/3"></div>
+            <div class="bg-secondary h-full w-1/3"></div>
+            <div class="bg-outline h-full w-1/3"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Architecture Specification Footnote -->
+      <footer class="relative z-10 mt-space-lg flex flex-wrap items-center justify-center gap-2 text-center text-on-surface-variant font-label-sm text-label-sm max-w-lg px-4 backdrop-blur-sm py-1 rounded-full bg-white/30 border border-white/50 shadow-sm">
+        <span class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+          Nginx API Gateway
         </span>
-<span class="text-on-surface">3 Containers Operational</span>
-</div>
-<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden flex">
-<div class="bg-primary h-full w-1/3"></div>
-<div class="bg-secondary h-full w-1/3"></div>
-<div class="bg-outline h-full w-1/3"></div>
-</div>
-</div>
-</div>
-<!-- Bottom Architecture Specification Footnote -->
-<footer class="relative z-10 mt-space-lg flex flex-wrap items-center justify-center gap-2 text-center text-on-surface-variant font-label-sm text-label-sm max-w-lg px-4">
-<span class="flex items-center gap-1.5">
-<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-      Nginx API Gateway
-    </span>
-<span class="opacity-40">â€¢</span>
-<span>Redis Partitioned Sessions</span>
-<span class="opacity-40">â€¢</span>
-<span>MongoDB Replica Auth</span>
-</footer>
-</div>
-<script>
-  function switchAuthMode(mode) {
-    const signinTab = document.getElementById('tab-signin');
-    const signupTab = document.getElementById('tab-signup');
-    const signinForm = document.getElementById('form-signin');
-    const signupForm = document.getElementById('form-signup');
+        <span class="opacity-40">•</span>
+        <span>Redis Partitioned Sessions</span>
+        <span class="opacity-40">•</span>
+        <span>MongoDB Replica Auth</span>
+      </footer>
 
-    if (mode === 'signin') {
-      signinTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5';
-      signupTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5';
-      signinForm.classList.remove('hidden');
-      signupForm.classList.add('hidden');
-    } else {
-      signupTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5';
-      signinTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5';
-      signupForm.classList.remove('hidden');
-      signinForm.classList.add('hidden');
-    }
-  }
+    </div>
 
-  function togglePasswordVisibility(inputId, triggerBtn) {
-    const field = document.getElementById(inputId);
-    const icon = triggerBtn.querySelector('.material-symbols-outlined');
-    if (!field || !icon) return;
+    <!-- Particle Canvas Overlay for Dynamic Sparks -->
+    <canvas class="fixed inset-0 pointer-events-none z-50 w-full h-full" id="spark-canvas"></canvas>
 
-    if (field.type === 'password') {
-      field.type = 'text';
-      icon.textContent = 'visibility_off';
-    } else {
-      field.type = 'password';
-      icon.textContent = 'visibility';
-    }
-  }
+    <script>
+      // API Base Path
+      const API_AUTH = '/auth';
 
-  function simulateAuth() {
-    const submitBtn = document.getElementById('btn-submit');
-    if (!submitBtn) return;
-    const originalContent = submitBtn.innerHTML;
-    submitBtn.innerHTML = `
-      <span class="material-symbols-outlined animate-spin text-[20px]">sync</span>
-      <span>Authenticating Token...</span>
-    `;
-    submitBtn.disabled = true;
-    setTimeout(() => {
-      submitBtn.innerHTML = `
-        <span class="material-symbols-outlined text-[20px]">check_circle</span>
-        <span>Gateway Authorized</span>
-      `;
-      setTimeout(() => {
-        submitBtn.innerHTML = originalContent;
-        submitBtn.disabled = false;
-      }, 1500);
-    }, 1200);
-  }
-</script></main></body></html>
+      // Smooth Interactive Mouse Movement Tracker
+      let targetX = window.innerWidth / 2;
+      let targetY = window.innerHeight / 2;
+      let currentX = targetX;
+      let currentY = targetY;
+      let animationFrameId = null;
+
+      window.addEventListener('mousemove', (e) => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        if (!animationFrameId) {
+          animationFrameId = requestAnimationFrame(updateMouseCoordinates);
+        }
+      });
+
+      // Touch support for mobile / touch devices
+      window.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+          targetX = e.touches[0].clientX;
+          targetY = e.touches[0].clientY;
+          if (!animationFrameId) {
+            animationFrameId = requestAnimationFrame(updateMouseCoordinates);
+          }
+        }
+      }, { passive: true });
+
+      function updateMouseCoordinates() {
+        currentX += (targetX - currentX) * 0.12;
+        currentY += (targetY - currentY) * 0.12;
+
+        document.documentElement.style.setProperty('--mouse-x', `${currentX}px`);
+        document.documentElement.style.setProperty('--mouse-y', `${currentY}px`);
+
+        if (Math.abs(targetX - currentX) > 0.5 || Math.abs(targetY - currentY) > 0.5) {
+          animationFrameId = requestAnimationFrame(updateMouseCoordinates);
+        } else {
+          animationFrameId = null;
+        }
+      }
+
+      // --- Dynamic Particle Sparks System ---
+      const sparkCanvas = document.getElementById('spark-canvas');
+      const sparkCtx = sparkCanvas ? sparkCanvas.getContext('2d') : null;
+      let particles = [];
+      let sparkAnimId = null;
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+      function resizeSparkCanvas() {
+        if (!sparkCanvas) return;
+        const dpr = window.devicePixelRatio || 1;
+        sparkCanvas.width = window.innerWidth * dpr;
+        sparkCanvas.height = window.innerHeight * dpr;
+        if (sparkCtx) {
+          sparkCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+      }
+
+      window.addEventListener('resize', resizeSparkCanvas);
+      resizeSparkCanvas();
+
+      const SPARK_PALETTES = [
+        { color: '#06b6d4', glow: 'rgba(6, 182, 212, 0.95)' },    // Electric Cyan
+        { color: '#ec4899', glow: 'rgba(236, 72, 153, 0.95)' },   // Neon Pink/Magenta
+        { color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.95)' },   // Golden Amber
+        { color: '#a855f7', glow: 'rgba(168, 85, 247, 0.95)' },   // Violet
+        { color: '#10b981', glow: 'rgba(16, 185, 129, 0.95)' },   // Emerald
+        { color: '#ffffff', glow: 'rgba(255, 255, 255, 1)' },      // Pure White
+        { color: '#38bdf8', glow: 'rgba(56, 189, 248, 0.95)' }    // Radiant Sky
+      ];
+
+      function drawSparkleStar(ctx, cx, cy, spikes, outerRadius, innerRadius) {
+        let rot = Math.PI / 2 * 3;
+        let x = cx;
+        let y = cy;
+        const step = Math.PI / spikes;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - outerRadius);
+        for (let i = 0; i < spikes; i++) {
+          x = cx + Math.cos(rot) * outerRadius;
+          y = cy + Math.sin(rot) * outerRadius;
+          ctx.lineTo(x, y);
+          rot += step;
+
+          x = cx + Math.cos(rot) * innerRadius;
+          y = cy + Math.sin(rot) * innerRadius;
+          ctx.lineTo(x, y);
+          rot += step;
+        }
+        ctx.lineTo(cx, cy - outerRadius);
+        ctx.closePath();
+      }
+
+      function createSparkBurst(x, y) {
+        if (prefersReducedMotion.matches) return;
+
+        // Iridescent expanding shockwave ring
+        const shockwave = document.createElement('div');
+        shockwave.className = 'spark-shockwave';
+        shockwave.style.left = `${x}px`;
+        shockwave.style.top = `${y}px`;
+        document.body.appendChild(shockwave);
+        shockwave.addEventListener('animationend', () => {
+          shockwave.remove();
+        });
+
+        const count = 36 + Math.floor(Math.random() * 13);
+        for (let i = 0; i < count; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 5.5 + Math.random() * 9.5; 
+          const chosenColor = SPARK_PALETTES[Math.floor(Math.random() * SPARK_PALETTES.length)];
+          const maxLife = 33 + Math.floor(Math.random() * 19);
+
+          const randType = Math.random();
+          const type = randType < 0.22 ? 'star' : (randType < 0.65 ? 'micro' : 'ember');
+          const baseSize = type === 'micro' ? (1.5 + Math.random() * 1.5) : (type === 'ember' ? (3.2 + Math.random() * 2.8) : (4.0 + Math.random() * 2.5));
+
+          particles.push({
+            x: x,
+            y: y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed - (Math.random() * 1.8),
+            size: baseSize,
+            initialSize: baseSize,
+            color: chosenColor.color,
+            glow: chosenColor.glow,
+            life: 0,
+            maxLife: maxLife,
+            drag: 0.88 + Math.random() * 0.04,
+            gravity: 0.06 + Math.random() * 0.08,
+            type: type,
+            rotation: Math.random() * Math.PI,
+            rotSpeed: (Math.random() - 0.5) * 0.2
+          });
+        }
+
+        if (!sparkAnimId) {
+          sparkAnimId = requestAnimationFrame(updateParticles);
+        }
+      }
+
+      function updateParticles() {
+        if (!sparkCtx || !sparkCanvas) return;
+        sparkCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.life++;
+
+          p.vx *= p.drag;
+          p.vy = p.vy * p.drag + p.gravity;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rotation += p.rotSpeed;
+
+          const progress = p.life / p.maxLife;
+          const opacity = Math.max(0, Math.pow(1 - progress, 1.4));
+          const currentRadius = Math.max(0.2, p.initialSize * (1 - progress * 0.75));
+
+          sparkCtx.save();
+          sparkCtx.translate(p.x, p.y);
+          sparkCtx.rotate(p.rotation);
+          sparkCtx.fillStyle = p.color;
+          sparkCtx.globalAlpha = opacity;
+          sparkCtx.shadowBlur = 10 * (1 - progress * 0.4);
+          sparkCtx.shadowColor = p.glow;
+
+          if (p.type === 'star') {
+            drawSparkleStar(sparkCtx, 0, 0, 4, currentRadius * 1.4, currentRadius * 0.35);
+            sparkCtx.fill();
+          } else {
+            sparkCtx.beginPath();
+            sparkCtx.arc(0, 0, currentRadius, 0, Math.PI * 2);
+            sparkCtx.fill();
+          }
+
+          sparkCtx.restore();
+
+          if (p.life >= p.maxLife) {
+            particles.splice(i, 1);
+          }
+        }
+
+        if (particles.length > 0) {
+          sparkAnimId = requestAnimationFrame(updateParticles);
+        } else {
+          sparkCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+          sparkAnimId = null;
+        }
+      }
+
+      window.addEventListener('pointerdown', (e) => {
+        createSparkBurst(e.clientX, e.clientY);
+      });
+
+      function switchAuthMode(mode) {
+        hideAlert();
+        const signinTab = document.getElementById('tab-signin');
+        const signupTab = document.getElementById('tab-signup');
+        const signinForm = document.getElementById('form-signin');
+        const signupForm = document.getElementById('form-signup');
+
+        if (mode === 'signin') {
+          signinTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5';
+          signupTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5';
+          signinForm.classList.remove('hidden');
+          signupForm.classList.add('hidden');
+        } else {
+          signupTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-semibold transition-all duration-200 bg-primary text-on-primary shadow-sm flex items-center justify-center gap-1.5';
+          signinTab.className = 'flex-1 py-1.5 rounded-full font-label-sm text-label-sm font-medium transition-all duration-200 text-on-surface-variant hover:text-on-surface flex items-center justify-center gap-1.5';
+          signupForm.classList.remove('hidden');
+          signinForm.classList.add('hidden');
+        }
+      }
+
+      function togglePasswordVisibility(inputId, triggerBtn) {
+        const field = document.getElementById(inputId);
+        const icon = triggerBtn.querySelector('.material-symbols-outlined');
+        if (!field || !icon) return;
+
+        if (field.type === 'password') {
+          field.type = 'text';
+          icon.textContent = 'visibility_off';
+        } else {
+          field.type = 'password';
+          icon.textContent = 'visibility';
+        }
+      }
+
+      function showAlert(msg, isSuccess = false) {
+        const alertBox = document.getElementById('auth-alert');
+        const icon = document.getElementById('auth-alert-icon');
+        const text = document.getElementById('auth-alert-text');
+        if (!alertBox) return;
+
+        alertBox.className = isSuccess
+          ? 'mb-4 p-3 rounded-2xl text-xs font-medium flex items-center gap-2 bg-emerald-100 text-emerald-800 border border-emerald-300'
+          : 'mb-4 p-3 rounded-2xl text-xs font-medium flex items-center gap-2 bg-rose-100 text-rose-800 border border-rose-300';
+
+        icon.textContent = isSuccess ? 'check_circle' : 'error';
+        text.textContent = msg;
+        alertBox.classList.remove('hidden');
+      }
+
+      function hideAlert() {
+        const alertBox = document.getElementById('auth-alert');
+        if (alertBox) alertBox.classList.add('hidden');
+      }
+
+      // Handle Sign In with Real Backend
+      async function handleSignIn(e) {
+        e.preventDefault();
+        hideAlert();
+        const submitBtn = document.getElementById('btn-signin');
+        const email = document.getElementById('signin-email').value.trim();
+        const password = document.getElementById('signin-password').value;
+
+        if (!email || !password) {
+          showAlert('Please provide both email and password.');
+          return;
+        }
+
+        const rect = submitBtn.getBoundingClientRect();
+        createSparkBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+        submitBtn.disabled = true;
+        const origContent = submitBtn.innerHTML;
+        submitBtn.innerHTML = `
+          <span class="material-symbols-outlined animate-spin text-[18px]">sync</span>
+          <span>Verifying Identity...</span>
+        `;
+
+        try {
+          const res = await fetch(`${API_AUTH}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            throw new Error(data.error?.message || 'Invalid credentials or tenant authorization failed.');
+          }
+
+          // Save Tokens & User in LocalStorage
+          localStorage.setItem('todo_access_token', data.data.accessToken);
+          if (data.data.refreshToken) {
+            localStorage.setItem('todo_refresh_token', data.data.refreshToken);
+          }
+          localStorage.setItem('todo_user', JSON.stringify(data.data.user));
+
+          showAlert(`Welcome back, ${data.data.user.name}! Redirecting...`, true);
+          submitBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+            <span>Gateway Authorized</span>
+          `;
+
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 800);
+        } catch (err) {
+          showAlert(err.message || 'Connection to API failed.');
+          submitBtn.innerHTML = origContent;
+          submitBtn.disabled = false;
+        }
+      }
+
+      // Handle Sign Up with Real Backend
+      async function handleSignUp(e) {
+        e.preventDefault();
+        hideAlert();
+        const submitBtn = document.getElementById('btn-signup');
+        const name = document.getElementById('signup-name').value.trim();
+        const email = document.getElementById('signup-email').value.trim();
+        const password = document.getElementById('signup-password').value;
+
+        if (!name || !email || !password) {
+          showAlert('All fields are required for tenant registration.');
+          return;
+        }
+
+        if (password.length < 6) {
+          showAlert('Password must be at least 6 characters long.');
+          return;
+        }
+
+        const rect = submitBtn.getBoundingClientRect();
+        createSparkBurst(rect.left + rect.width / 2, rect.top + rect.height / 2);
+
+        submitBtn.disabled = true;
+        const origContent = submitBtn.innerHTML;
+        submitBtn.innerHTML = `
+          <span class="material-symbols-outlined animate-spin text-[18px]">sync</span>
+          <span>Provisioning Tenant...</span>
+        `;
+
+        try {
+          const res = await fetch(`${API_AUTH}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+          });
+
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            throw new Error(data.error?.message || 'Registration failed. Email might already be in use.');
+          }
+
+          // Save session
+          localStorage.setItem('todo_access_token', data.data.accessToken);
+          if (data.data.refreshToken) {
+            localStorage.setItem('todo_refresh_token', data.data.refreshToken);
+          }
+          localStorage.setItem('todo_user', JSON.stringify(data.data.user));
+
+          showAlert(`Tenant created for ${data.data.user.name}! Loading Dashboard...`, true);
+          submitBtn.innerHTML = `
+            <span class="material-symbols-outlined text-[18px]">cloud_done</span>
+            <span>Tenant Provisioned</span>
+          `;
+
+          setTimeout(() => {
+            window.location.href = '/index.html';
+          }, 800);
+        } catch (err) {
+          showAlert(err.message || 'Failed to register account.');
+          submitBtn.innerHTML = origContent;
+          submitBtn.disabled = false;
+        }
+      }
+
+      // Check Existing Session on Load
+      try {
+        const savedUser = localStorage.getItem('todo_user');
+        const token = localStorage.getItem('todo_access_token');
+        if (savedUser && token) {
+          const userObj = JSON.parse(savedUser);
+          const pill = document.getElementById('active-session-pill');
+          const nameSpan = document.getElementById('active-user-name');
+          if (pill && nameSpan) {
+            nameSpan.textContent = `Active: ${userObj.name}`;
+            pill.classList.remove('hidden');
+            pill.classList.add('inline-flex');
+          }
+        }
+      } catch (err) {}
+    </script>
+  </main>
+</body>
+</html>

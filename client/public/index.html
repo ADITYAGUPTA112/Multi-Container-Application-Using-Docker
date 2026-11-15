@@ -207,7 +207,11 @@
     <div id="user-badge" class="px-3.5 py-1.5 rounded-full flex items-center gap-2 border border-outline-variant bg-surface-container text-xs font-medium text-on-surface">
       <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
       <span id="user-name-display">Guest</span>
-      <button id="logout-btn" title="Sign Out" class="ml-1 text-on-surface-variant hover:text-error transition text-xs font-semibold">Logout</button>
+      <a href="/auth.html" id="auth-portal-btn" title="Open Auth Portal" class="ml-1 px-2.5 py-0.5 rounded-full bg-primary text-on-primary hover:bg-secondary font-semibold transition text-xs flex items-center gap-1">
+        <span class="material-symbols-outlined text-[14px]">login</span>
+        <span>Login</span>
+      </a>
+      <button id="logout-btn" title="Sign Out" class="hidden ml-1 text-on-surface-variant hover:text-error transition text-xs font-semibold">Logout</button>
     </div>
 
     <!-- Cluster Status Indicator Badge -->
@@ -373,16 +377,22 @@
   function updateUserUI() {
     const userBadge = document.getElementById('user-badge');
     const userNameDisplay = document.getElementById('user-name-display');
+    const authPortalBtn = document.getElementById('auth-portal-btn');
+    const logoutBtn = document.getElementById('logout-btn');
     const authModal = document.getElementById('auth-modal');
     const closeBtn = document.getElementById('auth-modal-close-btn');
 
     if (currentUser) {
       userNameDisplay.textContent = currentUser.name || currentUser.email;
+      if (authPortalBtn) authPortalBtn.classList.add('hidden');
+      if (logoutBtn) logoutBtn.classList.remove('hidden');
       userBadge.classList.remove('hidden');
       authModal.classList.add('hidden');
       closeBtn.classList.remove('hidden');
     } else {
-      userNameDisplay.textContent = 'Sign In';
+      userNameDisplay.textContent = 'Guest';
+      if (authPortalBtn) authPortalBtn.classList.remove('hidden');
+      if (logoutBtn) logoutBtn.classList.add('hidden');
       authModal.classList.remove('hidden');
       closeBtn.classList.add('hidden'); // Force login
     }
