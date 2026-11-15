@@ -17,7 +17,7 @@ pipeline {
         stage('Install Dependencies & Run Tests') {
             steps {
                 dir('api') {
-                    bat 'npm.cmd ci || npm ci'
+                    bat 'npm.cmd install || npm install'
                     bat 'npm.cmd test || npm test'
                 }
             }
