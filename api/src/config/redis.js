@@ -10,36 +10,41 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://redis:6379';
  * Resilient Redis client instance with graceful reconnection strategy
  * and offline queue protection to prevent unhandled rejections during outages.
  */
-const redisClient = new Redis(REDIS_URL, {
-  enableOfflineQueue: false,
-  lazyConnect: false,
-  maxRetriesPerRequest: 1,
-  retryStrategy(times) {
-    const delay = Math.min(times * 100, 3000);
-    return delay;
-  },
-});
+let redisClient = null;
 
-// Event listeners for Redis client connection lifecycle
-redisClient.on('connect', () => {
-  console.log('[Redis] Connected to Redis server');
-});
+if (process.env.NODE_ENV !== 'test') {
+  redisClient = new Redis(REDIS_URL, {
+    enableOfflineQueue: false,
+    lazyConnect: false,
+    maxRetriesPerRequest: 1,
+    retryStrategy(times) {
+      if (times > 5) return null; // stop retrying after 5 attempts
+      const delay = Math.min(times * 100, 3000);
+      return delay;
+    },
+  });
 
-redisClient.on('ready', () => {
-  console.log('[Redis] Client ready to receive commands');
-});
+  // Event listeners for Redis client connection lifecycle
+  redisClient.on('connect', () => {
+    console.log('[Redis] Connected to Redis server');
+  });
 
-redisClient.on('error', (err) => {
-  console.error('[Redis] Client error:', err.message);
-});
+  redisClient.on('ready', () => {
+    console.log('[Redis] Client ready to receive commands');
+  });
 
-redisClient.on('close', () => {
-  console.log('[Redis] Connection closed');
-});
+  redisClient.on('error', (err) => {
+    console.error('[Redis] Client error:', err.message);
+  });
+
+  redisClient.on('close', () => {
+    console.log('[Redis] Connection closed');
+  });
+}
 
 /**
  * Checks if the Redis client is currently available and ready to accept commands.
- * Defaults to true if the client is mocked (status undefined) for unit test compatibility.
+ * Defaults to false if client is null or in test environment.
  *
  * @returns {boolean} True if ready or mocked, false if disconnected/connecting.
  */
